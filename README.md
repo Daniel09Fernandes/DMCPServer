@@ -62,6 +62,23 @@ begin
 end;
 ```
 
+## Attach on Claude AI
+
+Access the configuration on developer and edit config
+
+<img width="364" height="167" alt="image" src="https://github.com/user-attachments/assets/b0e1d02c-3806-49ec-81a2-b1bef521e93b" /><br>
+
+
+<img width="945" height="685" alt="image" src="https://github.com/user-attachments/assets/5cdc6748-6437-4ed6-84ff-e8cfe8502de3" /><br>
+
+
+In mcpServers node, attach your MCPServer
+
+
+<img width="713" height="283" alt="image" src="https://github.com/user-attachments/assets/8af35f54-3042-4004-9385-50b0eda76b4a" /><br>
+
+
+
 # Documentation
  
 📖 Read the complete documentation here:  [DMCPServer-docs](https://dmcpserver-doc.lovestoblog.com/)

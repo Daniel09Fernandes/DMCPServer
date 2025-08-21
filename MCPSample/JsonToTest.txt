@@ -1,0 +1,6 @@
+Past on Terminal(Console Application)
+
+{"method":"tools/call","params":{"name":"get_weather","arguments":{"location":"São Paulo"}},"jsonrpc":"2.0","id":309}
+
+"name" is the name of your MCPAction
+"arguments" is your parameters 

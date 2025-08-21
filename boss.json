@@ -1,0 +1,9 @@
+{
+	"name": "Dinos_MCP_Server",
+	"description": "Transform your Delphi code on MCP wih DMCPServer",
+	"version": "0.0.1",
+	"homepage": "https://github.com/Daniel09Fernandes/DMCPServer",
+	"mainsrc": "Source",
+	"projects": [],
+	"dependencies": {}
+}

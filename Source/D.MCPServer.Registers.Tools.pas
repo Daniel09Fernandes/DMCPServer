@@ -48,7 +48,7 @@ type
 
   TMCPServerToolsSchemaTypes = class(TInterfacedObject, IMCPServerToolsSchemaTypes)
   private
-    FISchema: IMCPServerToolsSchema;
+//    FISchema: IMCPServerToolsSchema;
     FPropType: TProType;
     constructor Create;
   public
@@ -67,7 +67,6 @@ type
     FAdditionalProperties: Boolean;
     FMCPServerTools: IMCPServerTools;
     constructor Create(AMCPServerTools: IMCPServerTools);
-    destructor Destroy;
   public
     function GetType: TProType;
     function SetType(AType: TProType): IMCPServerToolsSchema;
@@ -81,6 +80,7 @@ type
     function &End: IMCPServerTools;
 
     class function New(AMCPServerTools: IMCPServerTools): IMCPServerToolsSchema;
+    destructor Destroy; override;
   end;
 
   TMCPServerTools = class(TInterfacedObject, IMCPServerTools)

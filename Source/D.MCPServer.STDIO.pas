@@ -37,7 +37,7 @@ interface
 
 uses
   System.SysUtils, System.Classes,
-  System.JSON, System.IOUtils, Rest.Json,
+  System.JSON, Rest.Json,
   System.Generics.Collections,
   {$IFDEF MSWINDOWS}
     Winapi.Windows,
@@ -85,29 +85,42 @@ uses
   StrUtils,
   NetEncoding,
   D.MCPServer.Consts,
-  D.MCPServer.Registers.Tools.Interf;
+  D.MCPServer.Registers.Tools.Interf, System.IOUtils;
 
 class procedure TDMCPServer.WriteToLog(const AMessage: string);
 var
-  LLogFile: string;
-  LLog: TStringList;
+  lLogFile: string;
+  lStream: TFileStream;
+  lText: string;
+  lBytes: TBytes;
+  lAttempts: Integer;
 begin
-  if not FEnabledLogs then
-    Exit;
+  if not FEnabledLogs then Exit;
 
-  LLogFile := ExtractFilePath(ParamStr(0)) + DMCP_LOG;
+  lLogFile := ExtractFilePath(ParamStr(0)) + FormatDateTime('yy_mm_dd_hh', Now) + DMCP_LOG;
+  lText := '['+DateTimeToStr(Now) + ']: ' + AMessage;
+  lBytes := TEncoding.UTF8.GetBytes(lText);
 
-  LLog := TStringList.Create;
-  try
-    if FileExists(LLogFile) then
-      LLog.LoadFromFile(LLogFile);
-
-    LLog.Add(Format('[%s] %s', [DateTimeToStr(Now), AMessage]));
-
-    LLog.SaveToFile(LLogFile);
-  finally
-    LLog.Free;
-  end;
+  lAttempts := 0;
+  repeat
+    try
+      lStream := TFile.Create(lLogFile);
+      try
+        lStream.Seek(0, TSeekOrigin.soEnd);
+        lStream.Write(lBytes, Length(lBytes));
+        Exit;
+      finally
+        lStream.Free;
+      end;
+    except
+      on E: EFileStreamError do
+      begin
+        Inc(lAttempts);
+        if lAttempts > 5 then Exit;
+          Sleep(50);
+      end;
+    end;
+  until False;
 end;
 
 constructor TDMCPServer.Create;
@@ -136,8 +149,8 @@ end;
 
 procedure TDMCPServer.InitializeCapabilities;
 var
-  lJsonProp,
-  LJsonTool: TJSONObject;
+  lJsonProp: TJSONObject;
+  lJsonTool: TJSONObject;
   lJsonRequired: TJSONArray;
   lRequired: string;
   lProp: TPair<string, TProType>;
@@ -145,40 +158,37 @@ var
 begin
   for lTool in FServerInfo.Tools do
   begin
+    lJsonProp := TJSONObject.Create;
+    for lProp in lTool.InputSchema.GetProperties do
+    begin
+       lJsonProp
+        .AddPair(lProp.Key,  TJSONObject.Create
+          .AddPair(DMCP_JSON_TYPE, lProp.Value.ToString))
+    end;
 
-   for lProp in lTool.InputSchema.GetProperties do
-   begin
-     lJsonProp := TJSONObject.Create
-       .AddPair(lProp.Key,  TJSONObject.Create
-         .AddPair(DMCP_JSON_TYPE, lProp.Value.ToString))
-   end;
+    lJsonRequired := TJSONArray.Create;
 
-   lJsonRequired := TJSONArray.Create;
+    for lRequired in  lTool.InputSchema.GetRequired do
+      lJsonRequired.Add(lRequired);
 
-   for lRequired in  lTool.InputSchema.GetRequired do
-     lJsonRequired.Add(lRequired);
+    lJsonTool := TJSONObject.Create
+     .AddPair(DMCP_JSON_NAME, lTool.GetName)
+     .AddPair(DMCP_JSON_INPUT_SCHEMA, TJSONObject.Create
+         .AddPair(DMCP_JSON_TYPE, lTool.InputSchema.GetType.ToString)
+         .AddPair(DMCP_JSON_PROPERTIES, lJsonProp)
+       .AddPair(DMCP_JSON_REQUIRED, lJsonRequired)
+       .AddPair(DMCP_JSON_ADT_PROPS, lTool.InputSchema.GetAdditionalProperties)
+       .AddPair(DMCP_JSON_SCHEMA, DMCP_JSON_SCHEMA_VL)
+       );
 
-   LJsonTool := TJSONObject.Create
-    .AddPair(DMCP_JSON_NAME, lTool.GetName)
-    .AddPair(DMCP_JSON_INPUT_SCHEMA, TJSONObject.Create
-        .AddPair(DMCP_JSON_TYPE, lTool.InputSchema.GetType.ToString)
-        .AddPair(DMCP_JSON_PROPERTIES, lJsonProp)
-      .AddPair(DMCP_JSON_REQUIRED, lJsonRequired)
-      .AddPair(DMCP_JSON_ADT_PROPS, lTool.InputSchema.GetAdditionalProperties)
-      .AddPair(DMCP_JSON_SCHEMA, DMCP_JSON_SCHEMA_VL)
-      );
-
-    FCapabilities.AddElement(LJsonTool);
+     FCapabilities.AddElement(lJsonTool);
   end;
 end;
 
 function TDMCPServer.ProcessRequest(const ARequest: TJSONObject): TJSONObject;
 var
   lMethod: string;
-  lId: TJSONValue;
   lProtocol: TJSONValue;
-  lActionProc: TMCPAction;
-  lErrorValue: TJSONObject;
   lToolsCallResult: TDMCPCallToolsResult;
   lToolsCallError: TDMCPCallToolsContent;
   lJsonArgument: TJSONObject;
@@ -194,6 +204,7 @@ var
       .AddPair(DMCP_RESP_SERVER_ERROR_MESSAGE, AMessage));
   end;
 begin
+  lProtocol := nil;
   FNotReply := False;
   Result := TJSONObject.Create;
   try
@@ -340,7 +351,6 @@ procedure TDMCPServer.Run(AServerInfo: IMCPServerInfos);
 var
   lInput, LOutput: TextFile;
   lRequestStr: string;
-  lEncoding: TEncoding;
   lResponseStr: string;
   lResponse,
   lRequest: TJSONObject;
@@ -358,8 +368,7 @@ begin
       SetConsoleOutputCP(CP_UTF8);
       SetTextCodePage(Output, CP_UTF8);
       SetConsoleCP(CP_UTF8);
-    {$ENDIF}
-    lEncoding := TEncoding.UTF8;
+    {$ENDIF};
 
     while True do
     begin
@@ -376,7 +385,7 @@ begin
             if not FNotReply then
             begin
               try
-                lResponseStr := lEncoding.UTF8.GetString(lEncoding.ASCII.GetBytes(LResponse.ToString));
+                lResponseStr := TEncoding.UTF8.GetString(TEncoding.ASCII.GetBytes(LResponse.ToString));
                 WriteLn(LOutput, lResponseStr);
                 Flush(LOutput);
                 WriteToLog(DMCP_LOG_SERVER_SENDED + lResponseStr);

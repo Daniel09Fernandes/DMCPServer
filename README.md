@@ -84,4 +84,17 @@ In mcpServers node, attach your MCPServer
 📖 Read the complete documentation here:  [DMCPServer-docs](https://dmcpserver-doc.lovestoblog.com/)
 
 
+---
+
+### O componente é totalmente free, se ele foi muito útil para você, que tal me pagar um café para incentivar o projeto?
+
+PIX:
+
+<img src="https://github.com/Daniel09Fernandes/ComponentDinosOffice-OpenOffice/assets/29381329/00dcc168-df75-4228-b80d-7262c7b4c478" width="300" height="300">
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Daniel09Fernandes/DMCPServer&type=Date)](https://star-history.com/#Daniel09Fernandes/DinosOffice&Date)
+
 

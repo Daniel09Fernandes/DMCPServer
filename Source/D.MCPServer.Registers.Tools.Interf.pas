@@ -38,7 +38,7 @@ interface
 Uses System.Generics.Collections;
 
 type
-  TProType = (ptString, ptInteger, ptDouble, ptJson, ptObject, ptArray, ptText, ptBoolean);
+  TProType = (ptString, ptInteger, ptDouble, ptJson, ptObject, ptArray, ptText, ptBoolean, ptDate);
 
   IMCPServerTools = interface;
   IMCPServerToolsSchema = interface;
@@ -48,6 +48,10 @@ type
 
     function GetPropType: TProType;
     function SetPropType(APropType: TProType): IMCPServerToolsSchemaTypes;
+    function GetDescription: string;
+    function SetDescription(AValue: string): IMCPServerToolsSchemaTypes;
+    function GetFormat: string;
+    function SetFormat(AValue: TProType): IMCPServerToolsSchemaTypes;
   end;
 
   IMCPServerToolsSchema = interface
@@ -55,8 +59,8 @@ type
 
     function GetType: TProType;
     function SetType(AType: TProType): IMCPServerToolsSchema;
-    function GetProperties: TDictionary<string, TProType>;
-    function SetProperties(AKey: string; AValue: TProType): IMCPServerToolsSchema;
+    function GetProperties: TDictionary<string, IMCPServerToolsSchemaTypes>;
+    function SetProperties(AKey: string; AType: TProType = ptString; ADescription: string = ''; AFormat: TProType = ptText): IMCPServerToolsSchema;
     function GetRequired: TArray<string>;
     function SetRequired(ARequireds: TArray<string>): IMCPServerToolsSchema;
     function GetAdditionalProperties: Boolean;
@@ -70,6 +74,8 @@ type
 
     function GetName: string;
     function SetName(ANameTools: string): IMCPServerTools;
+    function SetDescription(AToolsDescription: string): IMCPServerTools;
+    function GetDescription: string;
     function InputSchema: IMCPServerToolsSchema;
   end;
 

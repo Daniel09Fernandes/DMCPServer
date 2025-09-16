@@ -153,7 +153,7 @@ var
   lJsonTool: TJSONObject;
   lJsonRequired: TJSONArray;
   lRequired: string;
-  lProp: TPair<string, TProType>;
+  lProp: TPair<string, IMCPServerToolsSchemaTypes>;
   lTool: IMCPServerTools;
 begin
   for lTool in FServerInfo.Tools do
@@ -163,7 +163,11 @@ begin
     begin
        lJsonProp
         .AddPair(lProp.Key,  TJSONObject.Create
-          .AddPair(DMCP_JSON_TYPE, lProp.Value.ToString))
+          .AddPair(DMCP_JSON_TYPE, lProp.Value.GetPropType.ToString)
+          .AddPair(DMCP_JSON_DESCRIPTION, lProp.Value.GetDescription));
+
+        if lProp.Value.GetFormat = ptDate.ToString then
+           lJsonProp.AddPair(DMCP_JSON_FORMAT, lProp.Value.GetFormat);
     end;
 
     lJsonRequired := TJSONArray.Create;
@@ -173,6 +177,7 @@ begin
 
     lJsonTool := TJSONObject.Create
      .AddPair(DMCP_JSON_NAME, lTool.GetName)
+     .AddPair(DMCP_JSON_DESCRIPTION, lTool.GetDescription)
      .AddPair(DMCP_JSON_INPUT_SCHEMA, TJSONObject.Create
          .AddPair(DMCP_JSON_TYPE, lTool.InputSchema.GetType.ToString)
          .AddPair(DMCP_JSON_PROPERTIES, lJsonProp)
@@ -250,7 +255,7 @@ begin
         end;
 
       DMCP_REQ_METHOD_RESOURCE_LIST_IDX:
-        begin
+        begin     //Necessary implement
           lJsonArrayResources := TJSONArray.Create;
           lJsonArrayResources.Add(TJSONObject.Create
             .AddPair(DMCP_RESOURCE_LIST_URI, DMCP_RESOURCE_LIST_URI_VLR)
@@ -265,7 +270,7 @@ begin
         end;
 
       DMCP_REQ_METHOD_PROMPT_LIST_IDX:
-        begin
+        begin  //Necessary implement
           Result.AddPair(DMCP_RESP_SERVER_RESULT, TJSONObject.Create);
 
           TDMCPServer.WriteToLog(DMCP_LOG_CALL_PROMPTS_LIST);
@@ -296,14 +301,14 @@ begin
                 lResponse.Id := lRequest.Id;
 
                 if not Assigned(lToolsCallError) then
-                begin 
+                begin
                   lResponse.Result.Free;             
                   lResponse.Result := lToolsCallResult;
                 end
                 else
                   lResponse.Result.Content.Add(lToolsCallError);
 
-                Result := lResponse.ToJson;  
+                Result := lResponse.ToJson;
               finally
                 lResponse.Free;
               end;

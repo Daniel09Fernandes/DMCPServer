@@ -6,8 +6,8 @@ program DinosMCPServer;
 
 uses
   {$IFDEF MSWINDOWS}
-    Winapi.Windows,
-  {$ENDIF}
+  Winapi.Windows,
+  {$ENDIF }
   System.SysUtils,
   System.json,
   D.MCPServer.STDIO in 'D.MCPServer.STDIO.pas',
@@ -24,6 +24,7 @@ uses
 var lDMCP: IDMCPServerRegister;
  lCallbackGetWeather: TMCPAction;
  lCallbackHelloWorld: TMCPAction;
+ lCallbackTest: TMCPAction;
 begin
   try
     //you can use that (TProc)
@@ -39,7 +40,7 @@ begin
          end);
        end;
 
-    // Otherwise (TMCPAction, you control memory )
+
     lCallbackHelloWorld :=
        procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent)
        begin
@@ -52,6 +53,18 @@ begin
          end);
        end;
 
+       lCallbackTest :=
+       procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent)
+       begin
+         lDMCP.Execute('My name is Daniel', Params, Result, Error,
+         procedure
+         begin
+           {$IFDEF MSWINDOWS}
+           MessageBox(0, 'Sayed', 'My name is Daniel', 0);   //callback
+           {$ENDIF}
+         end);
+       end;
+
     ReportMemoryLeaksOnShutdown := True;
 
     lDMCP := TDMCPServerRegister.New
@@ -60,11 +73,13 @@ begin
     lDMCP
       .RegisterAction('get_weather', 'Get current weather information',lCallbackGetWeather)
       .RegisterAction('hello_world', 'opa baum', lCallbackHelloWorld)
+//      .RegisterAction('say_my_name', 'Say my name to user', lCallbackTest)
       .ServerInfo
-      .SetServerName('DinosMCPServer')
-      .SetVersion('0.1.0')
+        .SetServerName('DinosMCPServer')
+        .SetVersion('0.1.0')
         .Tools(TMCPServerTools.New
            .SetName('hello_world')
+           .SetDescription('just test')
            .InputSchema
               .SetType(ptObject)
               .SetAdditionalProperties(False)
@@ -73,12 +88,20 @@ begin
           .SetName('get_weather')
           .InputSchema
              .SetType(ptObject)
-             .SetProperties('location', ptString)
-             .SetProperties('Conditions', ptString)
-             .SetProperties('EnableLog', ptBoolean)
+             .SetProperties('location', ptString, 'Location to get weather')
+             .SetProperties('Conditions', ptString, 'weather conditions')
+             .SetProperties('EnableLog', ptBoolean, 'if you need save log to this requeste')
              .SetRequired(['location'])
              .SetAdditionalProperties(False)
-          .&End);
+          .&End)
+//         .Tools(TMCPServerTools.New
+//           .SetName('say_my_name')
+//           .SetDescription('Say my name to user, when him quest')
+//           .InputSchema
+//              .SetType(ptObject)
+//              .SetAdditionalProperties(False)
+//           .&End)
+                        ;
     lDMCP.Run;
   except
     on E: Exception do

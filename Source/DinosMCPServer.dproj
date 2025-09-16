@@ -82,18 +82,22 @@
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_ConsoleTarget>true</DCC_ConsoleTarget>
-        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
-        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
+        <UWP_DelphiLogo44>$(ProjectName).Artwork\Windows\Uwp_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>$(ProjectName).Artwork\Windows\Uwp_150.png</UWP_DelphiLogo150>
+        <Icon_MainIcon>$(ProjectName).Artwork\Windows\AppIcon.ico</Icon_MainIcon>
+        <Icns_MainIcns>$(ProjectName).Artwork\Windows\AppIcon.icns</Icns_MainIcns>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <DCC_UsePackage>TMSAIStudioPkgDXE15;vclie;bindengine;IndyIPCommon;OpenOfficeComponent_install;dbxcds;vcledge;frLanguageSlovak29;FMXfrLanguageLatvian29;FMXfrLanguageDutch29;frLanguageArabic29;dbexpress;frLanguageCatalon29;frLanguageCzech29;inet;vcltouch;uniGUI29VCL;FireDACDBXDriver;FMXfrLanguageTurkish29;CustomIPTransport;FireDACMSSQLDriver;FMXfrLanguageCzech29;frLanguageItalian29;uniGUI29;vclFireDAC;FireDACODBCDriver;emsserverresource;frLanguageDanish29;rtl;FMXfrLanguageGerman29;frLanguageLithuanian29;DBXSqliteDriver;frLanguageRussian29;DBXSybaseASEDriver;FMXfrLanguageBrazil229;inetdbxpress;FireDAC;xmlrtl;ibxpress;dsnap;frLanguageSerbian29;FireDACDb2Driver;DBXOracleDriver;vclib;FMXfrLanguageFrench29;CEF4Delphi;DatasnapConnectorsFreePascal;bindcompvclwinx;FMXfrLanguageArabic29;bindcompfmx;frLanguageGerman29;FMXfrLanguageItalian29;ibmonitor;frLanguageIndonesian29;FMXfrLanguageSpanish29;FireDACASADriver;Tee;TMSAIStudioPkgExtensionsDXE15;vclactnband;FireDACInfxDriver;DBXMySQLDriver;VclSmp;DataSnapCommon;fmxase;FMXfrLanguageFarsi29;FMXfrLanguageChinese29;FMXfrLanguageJapanese29;frLanguageSlovene29;DataSnapIndy10ServerTransport;vcldsnap;DBXInterBaseDriver;frLanguageBrazil129;vcldb;FMXfrLanguageCatalon29;FMXfrLanguageHungarian29;inetstn;frLanguageJapanese29;FMXfrLanguageDanish29;FMXfrLanguageSlovene29;vcl;DataSnapClient;FMXfrLanguageSwedish29;frLanguageDutch29;emsclientfiredac;FireDACPgDriver;FireDACDSDriver;tethering;frLanguageBulgarian29;bindcompvcl;FMXfrLanguageBrazil29;CloudService;FMXfrLanguageRomanian29;soapserver;FireDACIBDriver;vclwinx;DataSnapServer;fmx;FMXfrLanguageSlovak29;DbxCommonDriver;VCLRESTComponents;FireDACCommonODBC;DBXMSSQLDriver;emsclient;appanalytics;IndyProtocols;vclx;frxADOQueryBuilder29;FmxTeeUI;frLanguageHungarian29;frxIBXQueryBuilder29;FMXfrLanguageUkrainian29;DBXFirebirdDriver;FireDACSqliteDriver;DbxClientDriver;soapmidas;TeeUI;frxFDQueryBuilder29;frLanguageBrazil29;FMXfrLanguageSwiss29;fmxdae;FMXfrLanguageBrazil129;frLanguageSwiss29;IndySystem;frLanguageSwedish29;ibxbindings;FMXfrLanguagePolish29;frLanguageUkrainian29;FireDACCommon;DataSnapServerMidas;bindcompdbx;FMXfrLanguageLithuanian29;FireDACMySQLDriver;frLanguageFrench29;vclimg;DataSnapFireDAC;DCP_XE7;FMXfrLanguageRussian29;DBXInformixDriver;frLanguageFarsi29;fmxobj;bindcompvclsmp;DataSnapNativeClient;FMXfrLanguageHebrew29;FMXfrLanguageCroatian29;frLanguageChinese29;frLanguageHebrew29;FMXfrLanguageBulgarian29;emshosting;FireDACCommonDriver;IndyIPClient;frLanguageTaiwan29;emsedge;frxDBXQueryBuilder29;uSynEdit_R2025;frLanguageRomanian29;inetdb;frLanguageBrazil229;fmxFireDAC;frLanguageCroatian29;DBXOdbcDriver;FMXfrLanguageTaiwan29;dbrtl;uniGUI29m;FireDACOracleDriver;FMXfrLanguagePortuguese29;TeeDB;FireDACMSAccDriver;DataSnapConnectors;frLanguageTurkish29;FireDACMongoDBDriver;frLanguageGreek29;FireDACTDataDriver;Skia.Package.VCL;bindcomp;frLanguageLatvian29;IndyCore;RESTBackendComponents;frLanguageSpanish29;FireDACADSDriver;RESTComponents;IndyIPServer;dsnapxml;adortl;dsnapcon;DataSnapProviderClient;FMXfrLanguageSerbian29;DBXDb2Driver;FMXfrLanguageIndonesian29;frLanguagePortuguese29;frLanguagePolish29;DBXSybaseASADriver;FMXfrLanguageGreek29;FMXTee;soaprtl;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_ConsoleTarget>true</DCC_ConsoleTarget>
-        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
-        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
+        <UWP_DelphiLogo44>$(ProjectName).Artwork\Windows\Uwp_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>$(ProjectName).Artwork\Windows\Uwp_150.png</UWP_DelphiLogo150>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <Icon_MainIcon>$(ProjectName).Artwork\Windows\AppIcon.ico</Icon_MainIcon>
+        <Icns_MainIcns>$(ProjectName).Artwork\Windows\AppIcon.icns</Icns_MainIcns>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
@@ -132,7 +136,9 @@
         <DCCReference Include="D.MCPServer.Registers.Tools.pas"/>
         <DCCReference Include="D.MCPServer.Registers.Actions.Interf.pas"/>
         <DCCReference Include="D.MCPServer.Registers.Actions.pas"/>
-        <DCCReference Include="D.MCPServer.Consts.pas"/>
+        <DCCReference Include="D.MCPServer.Consts.pas">
+            <Form>/CLient</Form>
+        </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -177,7 +183,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Win32\Debug\DinosMCPServer.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\MCPSample\DinosMCPServer.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>DinosMCPServer.exe</RemoteName>
                         <Overwrite>true</Overwrite>

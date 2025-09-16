@@ -52,6 +52,8 @@ const
   //Json RCP2
   DMCP_JSON_TYPE = 'type';
   DMCP_JSON_NAME = 'name';
+  DMCP_JSON_DESCRIPTION = 'description';
+  DMCP_JSON_FORMAT = 'format';
   DMCP_JSON_INPUT_SCHEMA = 'inputSchema';
   DMCP_JSON_PROPERTIES = 'properties';
   DMCP_JSON_REQUIRED = 'required';
@@ -109,6 +111,7 @@ const
   DMCP_RESOURCE_LIST_NAME_VLR = 'DinosMCPServer';
   DMCP_RESOURCE_LIST_MIME_TYPE_VLR = 'application/json';
   DMCP_RESOURCE_LIST_DESCRIPTION_VLR = 'Portability for Delphi Methods';
+
 implementation
 
 end.

@@ -44,16 +44,22 @@ type
     function ToString: string;
   end;
 
-  TMCPSchema = TDictionary<string, TProType>;
+  TMCPSchema = TDictionary<string, IMCPServerToolsSchemaTypes>;
 
   TMCPServerToolsSchemaTypes = class(TInterfacedObject, IMCPServerToolsSchemaTypes)
   private
 //    FISchema: IMCPServerToolsSchema;
     FPropType: TProType;
+    FDescription: string;
+    FFormat: string;
     constructor Create;
   public
     function GetPropType: TProType;
     function SetPropType(APropType: TProType): IMCPServerToolsSchemaTypes;
+    function GetDescription: string;
+    function SetDescription(AValue: string): IMCPServerToolsSchemaTypes;
+    function GetFormat: string;
+    function SetFormat(AValue: TProType): IMCPServerToolsSchemaTypes;
 
     class function New: IMCPServerToolsSchemaTypes;
   end;
@@ -71,7 +77,7 @@ type
     function GetType: TProType;
     function SetType(AType: TProType): IMCPServerToolsSchema;
     function GetProperties: TMCPSchema;
-    function SetProperties(AKey: string; AValue: TProType): IMCPServerToolsSchema;
+    function SetProperties(AKey: string; AType: TProType = ptString; ADescription: string = ''; AFormat: TProType = ptText): IMCPServerToolsSchema;
     function GetRequired: TArray<string>;
     function SetRequired(ARequireds: TArray<string>): IMCPServerToolsSchema;
     function GetAdditionalProperties: Boolean;
@@ -86,11 +92,14 @@ type
   TMCPServerTools = class(TInterfacedObject, IMCPServerTools)
   private
     FToolsName: string;
+    FToolsDescription: string;
     FInputSchema: IMCPServerToolsSchema;
     constructor Create;
   public
     function GetName: string;
     function SetName(ANameTools: string): IMCPServerTools;
+    function SetDescription(AToolsDescription: string): IMCPServerTools;
+    function GetDescription: string;
     function InputSchema: IMCPServerToolsSchema;
 
     class function New: IMCPServerTools;
@@ -110,6 +119,11 @@ end;
 function TMCPServerToolsSchema.GetAdditionalProperties: Boolean;
 begin
   Result := FAdditionalProperties;
+end;
+
+function TMCPServerTools.GetDescription: string;
+begin
+  Result := FToolsDescription;
 end;
 
 function TMCPServerTools.GetName: string;
@@ -135,6 +149,12 @@ end;
 function TMCPServerToolsSchema.SetAdditionalProperties(AValue: Boolean): IMCPServerToolsSchema;
 begin
   FAdditionalProperties := AValue;
+  Result := Self;
+end;
+
+function TMCPServerTools.SetDescription(AToolsDescription: string): IMCPServerTools;
+begin
+  FToolsDescription := AToolsDescription;
   Result := Self;
 end;
 
@@ -184,9 +204,16 @@ begin
   Result :=  TMCPServerToolsSchema.Create(AMCPServerTools);
 end;
 
-function TMCPServerToolsSchema.SetProperties(AKey: string; AValue: TProType): IMCPServerToolsSchema;
+function TMCPServerToolsSchema.SetProperties(AKey: string; AType: TProType = ptString; ADescription: string = ''; AFormat: TProType = ptText): IMCPServerToolsSchema;
+var
+  lSchema: IMCPServerToolsSchemaTypes;
 begin
-  FProperties.Add(AKey, AValue);
+  lSchema := TMCPServerToolsSchemaTypes.New;
+  lSchema.SetPropType(AType);
+  lSchema.SetDescription(ADescription);
+  lSchema.SetFormat(AFormat);
+
+  FProperties.Add(AKey, lSchema);
   Result := Self;
 end;
 
@@ -208,6 +235,16 @@ begin
 
 end;
 
+function TMCPServerToolsSchemaTypes.GetDescription: string;
+begin
+  Result := FDescription;
+end;
+
+function TMCPServerToolsSchemaTypes.GetFormat: string;
+begin
+  Result := FFormat;
+end;
+
 function TMCPServerToolsSchemaTypes.GetPropType: TProType;
 begin
   Result := FPropType;
@@ -216,6 +253,18 @@ end;
 class function TMCPServerToolsSchemaTypes.New: IMCPServerToolsSchemaTypes;
 begin
   Result := TMCPServerToolsSchemaTypes.Create;
+end;
+
+function TMCPServerToolsSchemaTypes.SetDescription(AValue: string): IMCPServerToolsSchemaTypes;
+begin
+  FDescription := AValue;
+  Result := Self;
+end;
+
+function TMCPServerToolsSchemaTypes.SetFormat(AValue: TProType): IMCPServerToolsSchemaTypes;
+begin
+  FFormat := AValue.ToString;
+  Result := Self;
 end;
 
 function TMCPServerToolsSchemaTypes.SetPropType(APropType: TProType): IMCPServerToolsSchemaTypes;
@@ -245,6 +294,8 @@ begin
       Result := 'array';
     ptBoolean:
       Result := 'boolean';
+    ptDate:
+      Result := 'date';
   end;
 end;
 

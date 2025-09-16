@@ -1,3 +1,6 @@
+Dinos MCPServer - Version 1.0.0
+---
+
 <p align="left">
   <a href="https://github.com/Daniel09Fernandes/DMCPServer/blob/main/img/DMCPServer.png">
     <img alt="DMCPServer" height="200" src="https://github.com/Daniel09Fernandes/DMCPServer/blob/main/img/DMCPServer.png">

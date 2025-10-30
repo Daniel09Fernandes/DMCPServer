@@ -139,6 +139,12 @@
         <DCCReference Include="D.MCPServer.Consts.pas">
             <Form>/CLient</Form>
         </DCCReference>
+        <DCCReference Include="D.MCPServer.Register.Resource.Interf.pas"/>
+        <DCCReference Include="D.MCPServer.Register.Resource.pas"/>
+        <DCCReference Include="D.MCPServer.ResourceRead.Model.pas"/>
+        <DCCReference Include="D.MCPServer.ResourceRead.Response.Model.Pas"/>
+        <DCCReference Include="D.MCPServer.HTTP.pas"/>
+        <DCCReference Include="D.MCPServer.Transport.HTTP.Interf.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

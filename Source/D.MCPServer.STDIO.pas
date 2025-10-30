@@ -43,11 +43,15 @@ uses
     Winapi.Windows,
   {$ENDIF}
   D.MCPServer.ToolsCall.Model,
+  D.MCPServer.ResourceRead.Model,
   D.MCPServer.Registers.Interf,
   D.MCPServer.ToolsCall.Response.Model,
+  D.MCPServer.ResourceRead.Response.Model,
   D.MCPServer.Registers,
   D.MCPServer.Registers.Tools,
-  D.MCPServer.Registers.Actions.Interf;
+  D.MCPServer.Registers.Actions.Interf,
+  D.MCPServer.Registers.Tools.Interf,
+  D.MCPServer.Register.Resource.Interf;
 
 type
   TMCPServerActions = TMCPAction;
@@ -59,16 +63,20 @@ type
   var
     FActions: TDictionary<string, TMCPServerActions>;
     FCapabilities: TJSONArray;
+    FResources: TJSONArray;
     FServerInfo: IMCPServerInfos;
     FNotReply: Boolean;
-    procedure InitializeCapabilities;
-    function ProcessRequest(const ARequest: TJSONObject): TJSONObject;
+    function FindResourceByUrl(AURL: string): IMCPServerResources;
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure Run(AServerInfo: IMCPServerInfos);
+    procedure SetServerInfo(AServerInfo: IMCPServerInfos);
     Procedure SetLogs(AEnabledLogs: Boolean);
+    procedure InitializeCapabilities;
+
+    function ProcessRequest(const ARequest: TJSONObject): TJSONObject;
 
     class procedure WriteToLog(const AMessage: string);
     property Actions: TDictionary<string, TMCPServerActions> read FActions write FActions;
@@ -85,7 +93,7 @@ uses
   StrUtils,
   NetEncoding,
   D.MCPServer.Consts,
-  D.MCPServer.Registers.Tools.Interf, System.IOUtils;
+  System.IOUtils;
 
 class procedure TDMCPServer.WriteToLog(const AMessage: string);
 var
@@ -131,6 +139,7 @@ begin
   try
     FActions := TDictionary<string, TMCPAction>.Create;
     FCapabilities := TJSONArray.Create;
+    FResources := TJSONArray.Create;
   except
     on E: Exception do
     begin
@@ -144,6 +153,7 @@ destructor TDMCPServer.Destroy;
 begin
   FActions.Free;
   FCapabilities.Free;
+  FResources.Free;
   inherited;
 end;
 
@@ -151,10 +161,12 @@ procedure TDMCPServer.InitializeCapabilities;
 var
   lJsonProp: TJSONObject;
   lJsonTool: TJSONObject;
+  lJsonResource: TJSONObject;
   lJsonRequired: TJSONArray;
   lRequired: string;
   lProp: TPair<string, IMCPServerToolsSchemaTypes>;
   lTool: IMCPServerTools;
+  IResource: IMCPServerResources;
 begin
   for lTool in FServerInfo.Tools do
   begin
@@ -188,6 +200,33 @@ begin
 
      FCapabilities.AddElement(lJsonTool);
   end;
+
+  for IResource in FServerInfo.Resources do
+  begin
+    lJsonResource := TJSONObject.Create
+      .AddPair('uri', IResource.GetUri)
+      .AddPair('name', IResource.GetName)
+      .AddPair('description', IResource.GetDescription);
+
+     if not IResource.GetMimeType.Trim.IsEmpty then
+       lJsonResource.AddPair('mimeType', IResource.GetMimeType);
+
+    FResources.AddElement(lJsonResource);
+  end;
+end;
+
+function TDMCPServer.FindResourceByUrl(AURL: string): IMCPServerResources;
+var
+  IResource: IMCPServerResources;
+begin
+  for IResource in FServerInfo.Resources do
+  begin
+    if IResource.GetUri = AURL then
+    begin
+      Result := IResource;
+      Break;
+    end;
+  end;
 end;
 
 function TDMCPServer.ProcessRequest(const ARequest: TJSONObject): TJSONObject;
@@ -195,15 +234,24 @@ var
   lMethod: string;
   lProtocol: TJSONValue;
   lToolsCallResult: TDMCPCallToolsResult;
+  lResourceRead: TMCPResourceRead;
   lToolsCallError: TDMCPCallToolsContent;
   lJsonArgument: TJSONObject;
   lMCPJson: TJSONObject;
   lRequest: TMCPToolsCall;
   lCapabilities: TJSONArray;
   lJsonArrayResources: TJSONArray;
+  lResourceFound: IMCPServerResources;
+  lResourceReadResponse: TMCPResourceReadResponse;
+  lResourceReadContent: TResourceContent;
 
   procedure GenerationExceptResponse(AMessage: string);
   begin
+    if Result.GetValue('result').ToString <> '' then
+    begin
+      Result.RemovePair('result');
+    end;
+
     Result.AddPair(DMCP_RESP_SERVER_ERROR, TJSONObject.Create
       .AddPair(DMCP_RESP_SERVER_ERROR_CODE, DMCP_RESP_SERVER_ERROR_CODE_DEFAULT)
       .AddPair(DMCP_RESP_SERVER_ERROR_MESSAGE, AMessage));
@@ -226,7 +274,7 @@ begin
     lMethod := ARequest.GetValue(DMCP_REQ_METHOD).Value;
 
     case AnsiIndexStr(LowerCase(lMethod), [DMCP_REQ_METHOD_INITIALIZATION, DMCP_REQ_METHOD_TOOLS_LIST, DMCP_REQ_METHOD_RESOURCE_LIST,
-       DMCP_REQ_METHOD_PROMPT_LIST, DMCP_REQ_METHOD_NOTIFICATION_INITIALIZED, DMCP_REQ_METHOD_TOOLS_CALL]) of
+       DMCP_REQ_METHOD_PROMPT_LIST, DMCP_REQ_METHOD_NOTIFICATION_INITIALIZED, DMCP_REQ_METHOD_TOOLS_CALL, DMCP_REQ_METHOD_RESOURCE_READ]) of
 
       DMCP_REQ_METHOD_INITIALIZATION_IDX:
         begin
@@ -255,18 +303,49 @@ begin
         end;
 
       DMCP_REQ_METHOD_RESOURCE_LIST_IDX:
-        begin     //Necessary implement
-          lJsonArrayResources := TJSONArray.Create;
-          lJsonArrayResources.Add(TJSONObject.Create
-            .AddPair(DMCP_RESOURCE_LIST_URI, DMCP_RESOURCE_LIST_URI_VLR)
-            .AddPair(DMCP_RESOURCE_LIST_NAME, DMCP_RESOURCE_LIST_NAME_VLR)
-            .AddPair(DMCP_RESOURCE_LIST_MIME_TYPE, DMCP_RESOURCE_LIST_MIME_TYPE_VLR)
-            .AddPair(DMCP_RESOURCE_LIST_DESCRIPTION, DMCP_RESOURCE_LIST_DESCRIPTION_VLR));
+        begin
+          if not Assigned(FResources) then
+            Exit;
+
+          lJsonArrayResources := FResources.Clone as TJSONArray;
 
           Result.AddPair(DMCP_RESP_SERVER_RESULT, TJSONObject.Create
             .AddPair(DMCP_RESP_SERVER_RESOURCE, lJsonArrayResources));
 
           TDMCPServer.WriteToLog(DMCP_LOG_CALL_RESOURCE_LIST);
+        end;
+
+      DMCP_REQ_METHOD_RESOURCE_READ_IDX:
+        begin
+          lResourceFound := Nil;
+
+          lResourceRead := TJson.JsonToObject<TMCPResourceRead>(ARequest.ToString);
+          try
+            lResourceFound := FindResourceByUrl(lResourceRead.Params.Uri);
+
+            if Assigned(lResourceFound) then
+            begin
+              lResourceReadResponse := TMCPResourceReadResponse.Create;
+              lResourceReadContent := TResourceContent.Create;
+              try
+                lResourceReadResponse.Id := lResourceRead.Id;
+                lResourceReadResponse.Jsonrpc := lResourceRead.Jsonrpc;
+
+                lResourceReadContent.Uri := lResourceFound.GetUri;
+                lResourceReadContent.MimeType := ifthen(lResourceFound.GetMimeType.Trim.IsEmpty, 'text/plain', lResourceFound.GetMimeType);
+                lResourceReadContent.Text := lResourceFound.GetDescription;
+
+                lResourceReadResponse.Result.Contents := [lResourceReadContent];
+
+                Result := TJson.ObjectToJsonObject(lResourceReadResponse);
+              finally
+                lResourceReadResponse.Free;
+//                lResourceReadContent.Free; // Limpo pelo Free de cima
+              end;
+            end;
+          finally
+            lResourceRead.Free;
+          end;
         end;
 
       DMCP_REQ_METHOD_PROMPT_LIST_IDX:
@@ -280,7 +359,6 @@ begin
         begin
           FNotReply := True;
           //NOT NECESSARY REPLY
-          //Result.AddPair('result', TJSONObject.Create);
           TDMCPServer.WriteToLog(DMCP_LOG_CALL_NOTIFY_INIT);
           Exit;
         end;
@@ -364,7 +442,7 @@ begin
   Reset(lInput);
   AssignFile(LOutput, '');
   Rewrite(LOutput);
-  FServerInfo := AServerInfo;
+  SetServerInfo(AServerInfo);
   InitializeCapabilities;
   try
     WriteToLog(DMCP_LOG_SERVER_INIT);
@@ -422,6 +500,11 @@ end;
 procedure TDMCPServer.SetLogs(AEnabledLogs: Boolean);
 begin
   FEnabledLogs := AEnabledLogs;
+end;
+
+procedure TDMCPServer.SetServerInfo(AServerInfo: IMCPServerInfos);
+begin
+  FServerInfo := AServerInfo;
 end;
 
 initialization

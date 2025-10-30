@@ -19,7 +19,13 @@ uses
   D.MCPServer.Registers.Tools in 'D.MCPServer.Registers.Tools.pas',
   D.MCPServer.Registers.Actions.Interf in 'D.MCPServer.Registers.Actions.Interf.pas',
   D.MCPServer.Registers.Actions in 'D.MCPServer.Registers.Actions.pas',
-  D.MCPServer.Consts in 'D.MCPServer.Consts.pas';
+  D.MCPServer.Consts in 'D.MCPServer.Consts.pas' {/CLient},
+  D.MCPServer.Register.Resource.Interf in 'D.MCPServer.Register.Resource.Interf.pas',
+  D.MCPServer.Register.Resource in 'D.MCPServer.Register.Resource.pas',
+  D.MCPServer.ResourceRead.Model in 'D.MCPServer.ResourceRead.Model.pas',
+  D.MCPServer.ResourceRead.Response.Model in 'D.MCPServer.ResourceRead.Response.Model.Pas',
+  D.MCPServer.HTTP in 'D.MCPServer.HTTP.pas',
+  D.MCPServer.Transport.HTTP.Interf in 'D.MCPServer.Transport.HTTP.Interf.pas';
 
 var lDMCP: IDMCPServerRegister;
  lCallbackGetWeather: TMCPAction;
@@ -73,10 +79,17 @@ begin
     lDMCP
       .RegisterAction('get_weather', 'Get current weather information',lCallbackGetWeather)
       .RegisterAction('hello_world', 'opa baum', lCallbackHelloWorld)
+      .Protocol(pMcpHTTP)
+      .Port('8182')
+      .Host('127.0.0.1')
 //      .RegisterAction('say_my_name', 'Say my name to user', lCallbackTest)
       .ServerInfo
         .SetServerName('DinosMCPServer')
         .SetVersion('0.1.0')
+        .Resources(TMCPServerResources.New
+           .SetUri('file:///D:/Documentos/DinosDev-Empresa/Orcamentos/OrcamentoModelo.odt')
+           .SetName('Model to create sales order')
+           .SetDescription('Standard budget template to be followed for sales orders.'))
         .Tools(TMCPServerTools.New
            .SetName('hello_world')
            .SetDescription('just test')

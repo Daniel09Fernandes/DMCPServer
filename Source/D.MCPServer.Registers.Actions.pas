@@ -39,6 +39,7 @@ uses
   Classes, System.SysUtils,
   System.JSON, System.IOUtils, Rest.Json,
   D.MCPServer.STDIO,
+  D.MCPServer.HTTP,
   D.MCPServer.Registers.Actions.Interf,
   D.MCPServer.Registers.Interf,
   D.MCPServer.Registers,
@@ -50,6 +51,9 @@ type
   private
     FServerInfo: IMCPServerInfos;
     FRequired: TDictionary<string, IMCPServerToolsSchemaTypes>;
+    FMcpProtocol: TMCPProtocol;
+    FPort: string;
+    FHost: string;
 
     procedure Initialize;
     procedure Finalize;
@@ -62,6 +66,10 @@ type
     function Required: TDictionary<string, IMCPServerToolsSchemaTypes>;
     function SetLogs(AEnabledLogs: Boolean): IDMCPServerRegister;
     function Execute(AStringResponse: string; var AParams: TJSONObject; var AResult: TDMCPCallToolsResult; var AError: TDMCPCallToolsContent; AExecute: TProc): IDMCPServerRegister;
+    function Protocol(AProtocol: TMCPProtocol = pMcpSTDIO):IDMCPServerRegister;
+    function Port(APort: string): IDMCPServerRegister;
+    function Host(AHost: string): IDMCPServerRegister;
+
     procedure Run;
     class function New: IDMCPServerRegister;
   end;
@@ -124,9 +132,27 @@ begin
   FServerInfo := nil;
 end;
 
+function TDMCPServerRegister.Host(AHost: string): IDMCPServerRegister;
+begin
+  Result := Self;
+  FHost := AHost;
+end;
+
 class function TDMCPServerRegister.New: IDMCPServerRegister;
 begin
   Result := TDMCPServerRegister.Create;
+end;
+
+function TDMCPServerRegister.Port(APort: string): IDMCPServerRegister;
+begin
+  Result := Self;
+  FPort := APort;
+end;
+
+function TDMCPServerRegister.Protocol(AProtocol: TMCPProtocol): IDMCPServerRegister;
+begin
+  Result := Self;
+  FMcpProtocol := AProtocol;
 end;
 
 function TDMCPServerRegister.RegisterAction(const ActionName, ActionDescription: string; const ActionProc: TMCPAction): IDMCPServerRegister;
@@ -142,7 +168,24 @@ end;
 
 procedure TDMCPServerRegister.Run;
 begin
-  DMCPServer.Run(FServerInfo);
+  case FMcpProtocol of
+    pMcpSTDIO:
+      DMCPServer.Run(FServerInfo);
+
+    pMcpHTTP:
+      begin
+        DMCPServer.SetServerInfo(FServerInfo);
+        DMCPServer.InitializeCapabilities;
+
+        var lDMCPhttp := TIndyHTTPTransportFactory.CreateTransport(
+          TJSONObject.Create
+            .AddPair('host', FHost)
+            .AddPair('port', FPort),
+         DMCPServer);
+
+        lDMCPhttp.Start;
+      end;
+  end;
 end;
 
 function TDMCPServerRegister.ServerInfo: IMCPServerInfos;

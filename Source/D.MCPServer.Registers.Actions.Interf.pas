@@ -45,6 +45,7 @@ uses
 
 type
    TMCPAction = reference to procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent);
+   TMCPProtocol = (pMcpSTDIO, pMcpHTTP);
 
    IDMCPServerRegister = interface
    ['{F07BD31B-CDD6-4EDA-8F63-1123DC028790}']
@@ -54,6 +55,9 @@ type
     function Required: TDictionary<string, IMCPServerToolsSchemaTypes>;
     function SetLogs(AEnabledLogs: Boolean): IDMCPServerRegister;
     function Execute(AStringResponse: string; var AParams: TJSONObject; var AResult: TDMCPCallToolsResult; var AError: TDMCPCallToolsContent; AExecute: TProc): IDMCPServerRegister;
+    function Protocol(AProtocol: TMCPProtocol = pMcpSTDIO): IDMCPServerRegister;
+    function Port(APort: string): IDMCPServerRegister;
+    function Host(AHost: string): IDMCPServerRegister;
 
     procedure Run;
    end;

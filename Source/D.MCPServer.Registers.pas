@@ -37,7 +37,8 @@ interface
 uses
   System.Generics.Collections,
   D.MCPServer.Registers.Interf,
-  D.MCPServer.Registers.Tools.Interf;
+  D.MCPServer.Registers.Tools.Interf,
+  D.MCPServer.Register.Resource.Interf;
 
 type
   TDMCPRegisters = class(TInterfacedObject, IMCPServerInfos)
@@ -45,6 +46,7 @@ type
     FServerName: string;
     FServerVersion: string;
     FITools: TList<IMCPServerTools>;
+    FIResource: TList<IMCPServerResources>;
 
     procedure Initialize;
     procedure Finalize;
@@ -59,6 +61,8 @@ type
 
     function Tools: TList<IMCPServerTools>; overload;
     function Tools(ATool: IMCPServerTools): IMCPServerInfos; overload;
+    function Resources(AResource: IMCPServerResources): IMCPServerInfos; overload;
+    function Resources: TList<IMCPServerResources>; overload;
 
     class function New: IMCPServerInfos;
   end;
@@ -82,6 +86,7 @@ end;
 procedure TDMCPRegisters.Initialize;
 begin
   FITools := TList<IMCPServerTools>.Create;
+  FIResource := TList<IMCPServerResources>.Create;
   FServerName := '';
   FServerVersion := '';
 end;
@@ -90,11 +95,19 @@ procedure TDMCPRegisters.Finalize;
 begin
   if Assigned(FITools) then
     FITools.Free;
+
+  if Assigned(FIResource) then
+    FIResource.Free;
 end;
 
 class function TDMCPRegisters.New: IMCPServerInfos;
 begin
   Result := TDMCPRegisters.Create;
+end;
+
+function TDMCPRegisters.Resources: TList<IMCPServerResources>;
+begin
+  Result := FIResource;
 end;
 
 function TDMCPRegisters.GetServerName: string;
@@ -130,6 +143,14 @@ begin
 
   if Assigned(ATool) then
     FITools.Add(ATool);
+end;
+
+function TDMCPRegisters.Resources(AResource: IMCPServerResources): IMCPServerInfos;
+begin
+  Result := Self;
+
+  if Assigned(AResource) then
+    FIResource.Add(AResource);
 end;
 
 end.

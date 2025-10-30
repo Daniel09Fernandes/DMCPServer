@@ -36,7 +36,8 @@ interface
 
 uses
   System.Generics.Collections,
-  D.MCPServer.Registers.Tools.Interf;
+  D.MCPServer.Registers.Tools.Interf,
+  D.MCPServer.Register.Resource.Interf;
 
 type
   IMCPServerInfos = interface;
@@ -46,6 +47,8 @@ type
 
     function Tools: TList<IMCPServerTools>; overload;
     function Tools(AListTools: IMCPServerTools): IMCPServerInfos; overload;
+    function Resources(AResource: IMCPServerResources): IMCPServerInfos; overload;
+    function Resources: TList<IMCPServerResources>; overload;
   end;
 
   IMCPServerInfos = interface(IMCPServerInfoTools)

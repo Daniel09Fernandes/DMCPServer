@@ -5,11 +5,11 @@ interface
 uses
   System.Classes, System.JSON, System.SysUtils, System.IOUtils,
   IdContext, IdCustomHTTPServer, IdHTTPServer, IdGlobal,
-   D.MCPServer.Transport.HTTP.Interf, D.MCPServer.STDIO; // Suas interfaces e tipos base
+   D.MCPServer.Transport.HTTP.Interf, D.MCPServer.STDIO;
 
 type
   /// <summary>
-  /// Implementação do transporte MCP usando o TIdHTTPServer do Indy.
+  /// Implementing MCP transport using Indy's TIdHTTPServer.
   /// </summary>
   TIndyHTTPMCPTransport = class(TInterfacedObject, IDMCPTransport)
   private
@@ -20,12 +20,12 @@ type
     //FOnRequest: TProc<TJSONObject, TProc<TJSONObject>, TProc<TDMCPCallToolsContent>>;
 
     /// <summary>
-    /// Evento principal do Indy que lida com as requisições POST.
+    /// The main Indy event that handles POST requests.
     /// </summary>
     procedure DoCommandGet(AContext: TIdContext; ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 
     /// <summary>
-    /// Lida com outros métodos HTTP, como OPTIONS para CORS.
+    /// It handles other HTTP methods, such as OPTIONS for CORS.
     /// </summary>
     procedure DoCommandOther(AContext: TIdContext; ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
   public
@@ -40,7 +40,7 @@ type
   end;
 
   /// <summary>
-  /// Fábrica para criar instâncias do transporte HTTP Indy.
+  ///A factory for creating instances of the Indy HTTP transport.
   /// </summary>
   TIndyHTTPTransportFactory = class
     class function CreateTransport(const Config: TJSONObject; AMCPCore: TDMCPServer): IDMCPTransport;
@@ -84,7 +84,6 @@ procedure TIndyHTTPMCPTransport.Start;
 begin
   if not FHTTPServer.Active then
   begin
-    // Limpa bindings anteriores e adiciona o novo
     FHTTPServer.Bindings.Clear;
     FHTTPServer.Bindings.Add.SetBinding(FHost, FPort);
 
@@ -108,7 +107,6 @@ end;
 
 procedure TIndyHTTPMCPTransport.DoCommandOther(AContext: TIdContext; ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 begin
-  // Essencial para suportar CORS (Cross-Origin Resource Sharing)
   if ARequestInfo.Command = 'OPTIONS' then
   begin
     AResponseInfo.ResponseNo := 200; // OK
@@ -126,13 +124,11 @@ var
   LResponseJSON: TJSONObject;
   LStringReader: TStreamReader;
 begin
-  // Define cabeçalhos CORS para todas as respostas
   AResponseInfo.CustomHeaders.Values['Access-Control-Allow-Origin'] := '*';
   AResponseInfo.ContentType := 'application/json';
 
   if ARequestInfo.Command = 'POST' then
   begin
-    // Lê o conteúdo do corpo da requisição (payload JSON)
     if Assigned(ARequestInfo.PostStream) and (ARequestInfo.PostStream.Size > 0) then
     begin
       ARequestInfo.PostStream.Position := 0;
@@ -158,10 +154,8 @@ begin
 end;
 
 procedure TIndyHTTPMCPTransport.SendResponse(const Response: TJSONObject);
-begin
-  // No modelo do Indy, a resposta é enviada diretamente no evento DoCommandGet.
+begin.
   // Este método é mantido para compatibilidade com a interface IDMCPTransport,
-  // mas sua implementação não é utilizada.
 end;
 
 function TIndyHTTPMCPTransport.IsActive: Boolean;

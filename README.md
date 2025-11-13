@@ -32,17 +32,50 @@ boss install github.com/Daniel09Fernandes/DMCPServer
 var     
   lCallbackGetWeather : TMCPAction;
 begin
-  lCallbackGetWeather :=
+ lCallbackGetWeather :=
        procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent)
+       var
+         Location: string;
+         EnableLog: Boolean;
+         WeatherService: IWeatherService;
+         WeatherData: string;
        begin
-         lDMCP.Execute('Temperatura em '+ Params.GetValue('location').Value + ' e está ensolarado', Params, Result, Error,
-         procedure
-         begin
-           {$IFDEF MSWINDOWS}
-           MessageBox(0, 'get_weather on execute', 'DinosDev', 0);  //callback
-           {$ENDIF}
-         end);
-       end;
+         try
+            try
+              // Extract parameters
+              Location := Params.GetParam('location');
+              EnableLog := Params.GetParam('EnableLog', trBool);
+
+              // Validation of required parameters
+              if Location.Trim = '' then
+                raise Exception.Create('Location parameter is required');
+
+              WeatherService := TMockWeatherService.Create;
+              WeatherData := WeatherService.GetWeatherData(Location);
+
+
+              if EnableLog then
+                TDMCPServer.WriteToLog(Format('Weather data requested for %s', [Location]));
+
+              // Assemble the result - There's no need to release it from memory; it's done automatically.
+              Result := TDMCPCallToolsResult.Create;
+              Result.Content.AddRange(TDMCPCallToolsContent.Create(ptText, WeatherData));
+
+              Error := nil;
+            finally
+              Params.Free;
+            end;
+         except
+            on E: Exception do
+            begin
+              // Handles exceptions. to MCPServers Defaults
+              Error := TDMCPCallToolsContent.Create(ptText,
+                'Weather service error: ' + E.Message);
+              TDMCPServer.WriteToLog('Error in get_weather: ' + E.Message);
+              Result := nil;
+            end;
+         end;
+        end;
 end;
 ```
 

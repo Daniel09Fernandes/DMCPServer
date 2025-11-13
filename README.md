@@ -19,22 +19,63 @@ Installation is done using the [`boss install`](https://github.com/HashLoad/boss
 boss install github.com/Daniel09Fernandes/DMCPServer
 ```
 
+## ⚙️ Protocol
+
+| Protocol   | Supported 	|
+|----------- |-----------	|
+| HTTP 	     |    ✅ 	  |
+| STDIO    	 |    ✅ 	  |
+
+
 ## 🚀 Register your Action
 ``` pascal
 var     
   lCallbackGetWeather : TMCPAction;
 begin
-  lCallbackGetWeather :=
+ lCallbackGetWeather :=
        procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent)
+       var
+         Location: string;
+         EnableLog: Boolean;
+         WeatherService: IWeatherService;
+         WeatherData: string;
        begin
-         lDMCP.Execute('Temperatura em '+ Params.GetValue('location').Value + ' e está ensolarado', Params, Result, Error,
-         procedure
-         begin
-           {$IFDEF MSWINDOWS}
-           MessageBox(0, 'get_weather on execute', 'DinosDev', 0);  //callback
-           {$ENDIF}
-         end);
-       end;
+         try
+            try
+              // Extract parameters
+              Location := Params.GetParam('location');
+              EnableLog := Params.GetParam('EnableLog', trBool);
+
+              // Validation of required parameters
+              if Location.Trim = '' then
+                raise Exception.Create('Location parameter is required');
+
+              WeatherService := TMockWeatherService.Create;
+              WeatherData := WeatherService.GetWeatherData(Location);
+
+
+              if EnableLog then
+                TDMCPServer.WriteToLog(Format('Weather data requested for %s', [Location]));
+
+              // Assemble the result - There's no need to release it from memory; it's done automatically.
+              Result := TDMCPCallToolsResult.Create;
+              Result.Content.AddRange(TDMCPCallToolsContent.Create(ptText, WeatherData));
+
+              Error := nil;
+            finally
+              Params.Free;
+            end;
+         except
+            on E: Exception do
+            begin
+              // Handles exceptions. to MCPServers Defaults
+              Error := TDMCPCallToolsContent.Create(ptText,
+                'Weather service error: ' + E.Message);
+              TDMCPServer.WriteToLog('Error in get_weather: ' + E.Message);
+              Result := nil;
+            end;
+         end;
+        end;
 end;
 ```
 
@@ -65,6 +106,17 @@ begin
 end;
 ```
 
+<img width="40" height="40" alt="image" src="https://github.com/user-attachments/assets/1e00baca-3bf2-4895-b1a1-1dcc04f90195" />  To add more resources to LLM memories for use with MCP
+```pascal
+ .ServerInfo
+        .SetServerName('DinosMCPServer')
+        .SetVersion('0.1.0')
+        .Resources(TMCPServerResources.New
+           .SetUri('file:///C:/Users/danie/Downloads/teste/fatura-exemplo.csv')
+           .SetName('Model to create sales order')
+           .SetDescription('Standard budget template to be followed for sales orders.'))
+```
+
 ## Attach on Claude AI
 
 Access the configuration on developer and edit config
@@ -75,10 +127,14 @@ Access the configuration on developer and edit config
 <img width="945" height="685" alt="image" src="https://github.com/user-attachments/assets/5cdc6748-6437-4ed6-84ff-e8cfe8502de3" /><br>
 
 
-In mcpServers node, attach your MCPServer
+In mcpServers node, attach your MCPServer(STDIO)
 
 
 <img width="713" height="283" alt="image" src="https://github.com/user-attachments/assets/8af35f54-3042-4004-9385-50b0eda76b4a" /><br>
+
+To HTTP: 
+
+<img width="398" height="604" alt="image" src="https://github.com/user-attachments/assets/fb4f3cb4-16e6-4908-ac57-44d1a1f76f87" />
 
 
 

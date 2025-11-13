@@ -44,9 +44,17 @@ uses
   D.MCPServer.Registers.Interf,
   D.MCPServer.Registers,
   D.MCPServer.Registers.Tools.Interf,
-  D.MCPServer.ToolsCall.Response.Model;
+  D.MCPServer.ToolsCall.Response.Model,
+  Variants,
+  System.DateUtils;
 
 type
+  TTypeReturnGetParam = (trString, trInt, trFloat, trBool, trDateTime);
+
+  TParamsHelper = class helper for TJSONObject
+    function GetParam(ANameParam: string; ATypeReturn: TTypeReturnGetParam = trString): variant;
+  end;
+
   TDMCPServerRegister = class(TInterfacedObject, IDMCPServerRegister)
   private
     FServerInfo: IMCPServerInfos;
@@ -200,6 +208,51 @@ function TDMCPServerRegister.SetLogs(AEnabledLogs: Boolean): IDMCPServerRegister
 begin
   DMCPServer.SetLogs(AEnabledLogs);
   Result := Self;
+end;
+
+{ TParamsHelper }
+
+function TParamsHelper.GetParam(ANameParam: string; ATypeReturn: TTypeReturnGetParam): variant;
+var
+  lParams: TJSONObject;
+  lValue: string;
+  lFormatSettings: TFormatSettings;
+begin
+  lValue := '';
+  if not Self.TryGetValue(ANameParam, lValue) then
+  begin
+    lParams := Self.GetValue('params') as TJSONObject;
+    if lParams <> nil then
+    begin
+      try
+        lParams.TryGetValue(ANameParam, lValue);
+      finally
+        lParams.Free;
+      end;
+    end;
+  end;
+
+  case ATypeReturn of
+     trString: Result := lValue;
+     trInt:  Result := StrToIntDef(lValue, 0);
+     trFloat:  Result := StrToFloatDef(lValue, 0);
+     trBool:  Result := StrToBoolDef(lValue, False);
+     trDateTime:
+       begin
+         if lValue.Contains('-') then
+         begin
+           lFormatSettings := TFormatSettings.Create;
+           lFormatSettings.ShortDateFormat := 'yyyy-mm-dd';
+           lFormatSettings.DateSeparator := '-';
+
+           Result := StrToDate(lValue, lFormatSettings);
+         end
+         else
+           Result := StrToDateDef(lValue, 0);
+       end
+   else
+     Result := lValue;
+  end;
 end;
 
 end.

@@ -62,9 +62,9 @@ begin
   FHTTPServer.DefaultPort := FPort;
   FHTTPServer.OnCommandGet := DoCommandGet;
   FHTTPServer.OnCommandOther := DoCommandOther;
-
-  // O Indy lida bem com threads, mas é bom configurar o max de conexões se necessário
-  FHTTPServer.MaxConnections := 100; // Exemplo
+  FHTTPServer.MaxConnections := 100;
+  FHTTPServer.KeepAlive := True;
+  FHTTPServer.SessionTimeOut := 60000;
 end;
 
 destructor TIndyHTTPMCPTransport.Destroy;

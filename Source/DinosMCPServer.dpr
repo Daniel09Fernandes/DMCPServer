@@ -31,90 +31,113 @@ var lDMCP: IDMCPServerRegister;
  lCallbackGetWeather: TMCPAction;
  lCallbackHelloWorld: TMCPAction;
  lCallbackTest: TMCPAction;
+
+ type
+  IWeatherService = interface
+    function GetWeatherData(const Location: string): string;
+  end;
+
+  type
+  TMockWeatherService = class(TInterfacedObject, IWeatherService)
+  public
+    function GetWeatherData(const Location: string): string;
+  end;
+
+{ TMockWeatherService }
+
+function TMockWeatherService.GetWeatherData(const Location: string): string;
+var
+  Temperature: Integer;
+  Condition: string;
+  Humidity: Integer;
+begin
+  // radom data
+  Temperature := Random(31) + 5; // 5-35°C
+  case Random(4) of
+    0: Condition := 'Ensolarado';
+    1: Condition := 'Nublado';
+    2: Condition := 'Chuvoso';
+    3: Condition := 'Parcialmente Nublado';
+  end;
+  Humidity := Random(40) + 40; // 40-80%
+
+  Result := Format('{"location": "%s", "temperature": %d, "condition": "%s", "humidity": %d, "timestamp": "%s"}',
+    [Location, Temperature, Condition, Humidity, FormatDateTime('yyyy-mm-dd hh:nn:ss', Now)]);
+end;
+
 begin
   try
-    //you can use that (TProc)
     lCallbackGetWeather :=
        procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent)
+       var
+         Location: string;
+         EnableLog: Boolean;
+         WeatherService: IWeatherService;
+         WeatherData: string;
        begin
-         lDMCP.Execute('Temperatura em '+ Params.GetValue('location').Value + ' e está ensolarado', Params, Result, Error,
-         procedure
-         begin
-           {$IFDEF MSWINDOWS}
-           MessageBox(0, 'get_weather on execute', 'DinosDev', 0);  //callback
-           {$ENDIF}
-         end);
-       end;
+         try
+            try
+              // Extract parameters
+              Location := Params.GetParam('location');
+              EnableLog := Params.GetParam('EnableLog', trBool);
+
+              // Validation of required parameters
+              if Location.Trim = '' then
+                raise Exception.Create('Location parameter is required');
+
+              WeatherService := TMockWeatherService.Create;
+              WeatherData := WeatherService.GetWeatherData(Location);
 
 
-    lCallbackHelloWorld :=
-       procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent)
-       begin
-         lDMCP.Execute('Salve meu Claude, baum?', Params, Result, Error,
-         procedure
-         begin
-           {$IFDEF MSWINDOWS}
-           MessageBox(0, 'Hello World', 'DinosDev', 0);   //callback
-           {$ENDIF}
-         end);
-       end;
+              if EnableLog then
+                TDMCPServer.WriteToLog(Format('Weather data requested for %s', [Location]));
 
-       lCallbackTest :=
-       procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent)
-       begin
-         lDMCP.Execute('My name is Daniel', Params, Result, Error,
-         procedure
-         begin
-           {$IFDEF MSWINDOWS}
-           MessageBox(0, 'Sayed', 'My name is Daniel', 0);   //callback
-           {$ENDIF}
-         end);
-       end;
+              // Assemble the result - There's no need to release it from memory; it's done automatically.
+              Result := TDMCPCallToolsResult.Create;
+              Result.Content.AddRange(TDMCPCallToolsContent.Create(ptText, WeatherData));
+
+              Error := nil;
+            finally
+              Params.Free;
+            end;
+         except
+            on E: Exception do
+            begin
+              // Handles exceptions. to MCPServers Defaults
+              Error := TDMCPCallToolsContent.Create(ptText,
+                'Weather service error: ' + E.Message);
+              TDMCPServer.WriteToLog('Error in get_weather: ' + E.Message);
+              Result := nil;
+            end;
+         end;
+        end;
 
     ReportMemoryLeaksOnShutdown := True;
 
     lDMCP := TDMCPServerRegister.New
-      .SetLogs(True);  //Set Logs Request
+      .SetLogs(False);  //Set Logs Request
 
     lDMCP
-      .RegisterAction('get_weather', 'Get current weather information',lCallbackGetWeather)
-      .RegisterAction('hello_world', 'opa baum', lCallbackHelloWorld)
-      .Protocol(pMcpHTTP)
-      .Port('8182')
-      .Host('127.0.0.1')
-//      .RegisterAction('say_my_name', 'Say my name to user', lCallbackTest)
+      .RegisterAction('get_weather', 'Get weather information, such as the latest weather forecast.',lCallbackGetWeather)
+      .Protocol(pMcpHTTP)  //To Run Local use pMcpSTIO
+      .Port('8182')  //No Need to pMcpSTIO
+      .Host('127.0.0.1') //No Need to pMcpSTIO
       .ServerInfo
         .SetServerName('DinosMCPServer')
         .SetVersion('0.1.0')
         .Resources(TMCPServerResources.New
-           .SetUri('file:///D:/Documentos/DinosDev-Empresa/Orcamentos/OrcamentoModelo.odt')
-           .SetName('Model to create sales order')
-           .SetDescription('Standard budget template to be followed for sales orders.'))
+           .SetUri('file:///'+ ParamStr(0).Replace('\','/') + '/Resource_teste/Resource.txt')
+           .SetName('weather forecasting works.')
+           .SetDescription('Explanation of how weather forecasting works.'))
         .Tools(TMCPServerTools.New
-           .SetName('hello_world')
-           .SetDescription('just test')
-           .InputSchema
-              .SetType(ptObject)
-              .SetAdditionalProperties(False)
-           .&End)
-        .Tools(TMCPServerTools.New
-          .SetName('get_weather')
+          .SetName('get_weather')  //Same name the RegisterAction
           .InputSchema
              .SetType(ptObject)
              .SetProperties('location', ptString, 'Location to get weather')
-             .SetProperties('Conditions', ptString, 'weather conditions')
              .SetProperties('EnableLog', ptBoolean, 'if you need save log to this requeste')
              .SetRequired(['location'])
              .SetAdditionalProperties(False)
-          .&End)
-//         .Tools(TMCPServerTools.New
-//           .SetName('say_my_name')
-//           .SetDescription('Say my name to user, when him quest')
-//           .InputSchema
-//              .SetType(ptObject)
-//              .SetAdditionalProperties(False)
-//           .&End)
-                        ;
+          .&End);
     lDMCP.Run;
   except
     on E: Exception do

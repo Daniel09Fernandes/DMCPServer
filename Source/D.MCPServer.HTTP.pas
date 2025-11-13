@@ -154,7 +154,7 @@ begin
 end;
 
 procedure TIndyHTTPMCPTransport.SendResponse(const Response: TJSONObject);
-begin.
+begin
   // Este método é mantido para compatibilidade com a interface IDMCPTransport,
 end;
 

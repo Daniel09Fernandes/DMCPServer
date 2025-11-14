@@ -154,6 +154,6 @@ PIX:
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Daniel09Fernandes/DMCPServer&type=Date)](https://star-history.com/#Daniel09Fernandes/DinosOffice&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=daniel09fernandes/DMCPServer&type=date&legend=top-left)](https://www.star-history.com/#daniel09fernandes/DMCPServer&type=date&legend=top-left)
 
 

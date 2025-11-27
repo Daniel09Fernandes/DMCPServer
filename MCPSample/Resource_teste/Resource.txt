@@ -1,0 +1,6 @@
+Weather forecasting works by collecting atmospheric data from weather stations, satellites, and radars, which are sent to supercomputers. These computers use complex mathematical models to simulate the atmosphere and predict the future behavior of variables such as temperature, humidity, wind, and precipitation. Finally, meteorologists analyze these simulations, identify patterns, and issue warnings to the public.
+
+Data Collection
+Weather Stations: Equipment on land and at sea measures data such as temperature, humidity, atmospheric pressure, and wind at specific points.
+Weather Satellites: Observe cloud patterns, humidity, and the direction of meteorological phenomena over large areas.
+Weather Radars: Emit pulses of energy to detect the location, intensity, and movement of rain, snow, or hail, helping to predict storms in real time.

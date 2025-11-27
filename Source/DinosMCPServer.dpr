@@ -77,11 +77,9 @@ begin
        begin
          try
             try
-              // Extract parameters
               Location := Params.GetParam('location');
               EnableLog := Params.GetParam('EnableLog', trBool);
 
-              // Validation of required parameters
               if Location.Trim = '' then
                 raise Exception.Create('Location parameter is required');
 
@@ -92,7 +90,6 @@ begin
               if EnableLog then
                 TDMCPServer.WriteToLog(Format('Weather data requested for %s', [Location]));
 
-              // Assemble the result - There's no need to release it from memory; it's done automatically.
               Result := TDMCPCallToolsResult.Create;
               Result.Content.AddRange(TDMCPCallToolsContent.Create(ptText, WeatherData));
 
@@ -103,7 +100,7 @@ begin
          except
             on E: Exception do
             begin
-              // Handles exceptions. to MCPServers Defaults
+
               Error := TDMCPCallToolsContent.Create(ptText,
                 'Weather service error: ' + E.Message);
               TDMCPServer.WriteToLog('Error in get_weather: ' + E.Message);
@@ -118,7 +115,7 @@ begin
       .SetLogs(False);  //Set Logs Request
 
     lDMCP
-      .RegisterAction('get_weather', 'Get weather information, such as the latest weather forecast.',lCallbackGetWeather)
+      .RegisterAction('get_weather', 'Get weather information, such as the latest weather forecast.', lCallbackGetWeather)
       .Protocol(pMcpHTTP)  //To Run Local use pMcpSTIO
       .Port('8182')  //No Need to pMcpSTIO
       .Host('127.0.0.1') //No Need to pMcpSTIO

@@ -1,4 +1,4 @@
-Dinos MCPServer - Version 1.0.0
+Dinos MCPServer - Version 1.0.1
 ---
 
 <p align="left">

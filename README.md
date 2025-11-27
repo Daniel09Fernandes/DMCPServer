@@ -142,6 +142,8 @@ To HTTP:
  
 📖 Read the complete documentation here:  [DMCPServer-docs](https://dmcpserver-doc.lovestoblog.com/)
 
+🎬 Watch on Youtube [DMCPServer - PT-BR](https://www.youtube.com/watch?v=AAv67r8OuWo&feature=youtu.be)  
+
 
 ---
 

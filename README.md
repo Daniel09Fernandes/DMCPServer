@@ -144,6 +144,7 @@ To HTTP:
 
 🎬 Watch on Youtube [DMCPServer - PT-BR](https://www.youtube.com/watch?v=AAv67r8OuWo&feature=youtu.be)  
 
+🎬 Watch on Youtube, Full explanation of MCP [DMCPServer - EN-US](https://www.youtube.com/live/a5-xjUtc-CA?si=SvytgAkpgRqWkUXi&t=4437)   
 
 ---
 

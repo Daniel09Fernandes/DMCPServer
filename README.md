@@ -7,7 +7,7 @@ Dinos MCPServer - Version 1.0.1
   </a>  
 </p><br>
 <p align="left">
-  <b>Transform your Delphi code on MCPServer wih DMCPServer.</b>
+  <b>Transform your Delphi code into a MCP-server with DMCPServer.</b>
 </p><br>
 
 ## 🎯 About

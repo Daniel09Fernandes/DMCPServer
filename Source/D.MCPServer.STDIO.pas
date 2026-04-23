@@ -93,6 +93,7 @@ uses
   StrUtils,
   NetEncoding,
   D.MCPServer.Consts,
+  D.MCPServer.Json.Helper,
   System.IOUtils;
 
 class procedure TDMCPServer.WriteToLog(const AMessage: string);

@@ -25,7 +25,8 @@ uses
   D.MCPServer.ResourceRead.Model in 'D.MCPServer.ResourceRead.Model.pas',
   D.MCPServer.ResourceRead.Response.Model in 'D.MCPServer.ResourceRead.Response.Model.Pas',
   D.MCPServer.HTTP in 'D.MCPServer.HTTP.pas',
-  D.MCPServer.Transport.HTTP.Interf in 'D.MCPServer.Transport.HTTP.Interf.pas';
+  D.MCPServer.Transport.HTTP.Interf in 'D.MCPServer.Transport.HTTP.Interf.pas',
+  D.MCPServer.Json.Helper in 'D.MCPServer.Json.Helper.pas';
 
 var lDMCP: IDMCPServerRegister;
  lCallbackGetWeather: TMCPAction;
@@ -116,9 +117,9 @@ begin
 
     lDMCP
       .RegisterAction('get_weather', 'Get weather information, such as the latest weather forecast.', lCallbackGetWeather)
-      .Protocol(pMcpHTTP)  //To Run Local use pMcpSTIO
-      .Port('8182')  //No Need to pMcpSTIO
-      .Host('127.0.0.1') //No Need to pMcpSTIO
+      .Protocol(pMcpSTDIO)  //To Run Local use pMcpSTIO
+      //.Port('8182')  //No Need to pMcpSTIO
+      //.Host('127.0.0.1') //No Need to pMcpSTIO
       .ServerInfo
         .SetServerName('DinosMCPServer')
         .SetVersion('0.1.0')

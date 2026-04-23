@@ -38,7 +38,8 @@ uses
   System.Generics.Collections,
   D.MCPServer.Registers.Interf,
   D.MCPServer.Registers.Tools.Interf,
-  D.MCPServer.Register.Resource.Interf;
+  D.MCPServer.Register.Resource.Interf,
+  D.MCPServer.Register.Prompt.Interf;
 
 type
   TDMCPRegisters = class(TInterfacedObject, IMCPServerInfos)
@@ -47,6 +48,7 @@ type
     FServerVersion: string;
     FITools: TList<IMCPServerTools>;
     FIResource: TList<IMCPServerResources>;
+    FIPrompts: TList<IMCPServerPrompts>;
 
     procedure Initialize;
     procedure Finalize;
@@ -63,6 +65,8 @@ type
     function Tools(ATool: IMCPServerTools): IMCPServerInfos; overload;
     function Resources(AResource: IMCPServerResources): IMCPServerInfos; overload;
     function Resources: TList<IMCPServerResources>; overload;
+    function Prompts(APrompt: IMCPServerPrompts): IMCPServerInfos; overload;
+    function Prompts: TList<IMCPServerPrompts>; overload;
 
     class function New: IMCPServerInfos;
   end;
@@ -87,6 +91,7 @@ procedure TDMCPRegisters.Initialize;
 begin
   FITools := TList<IMCPServerTools>.Create;
   FIResource := TList<IMCPServerResources>.Create;
+  FIPrompts := TList<IMCPServerPrompts>.Create;
   FServerName := '';
   FServerVersion := '';
 end;
@@ -98,6 +103,9 @@ begin
 
   if Assigned(FIResource) then
     FIResource.Free;
+
+  if Assigned(FIPrompts) then
+    FIPrompts.Free;
 end;
 
 class function TDMCPRegisters.New: IMCPServerInfos;
@@ -151,6 +159,19 @@ begin
 
   if Assigned(AResource) then
     FIResource.Add(AResource);
+end;
+
+function TDMCPRegisters.Prompts: TList<IMCPServerPrompts>;
+begin
+  Result := FIPrompts;
+end;
+
+function TDMCPRegisters.Prompts(APrompt: IMCPServerPrompts): IMCPServerInfos;
+begin
+  Result := Self;
+
+  if Assigned(APrompt) then
+    FIPrompts.Add(APrompt);
 end;
 
 end.

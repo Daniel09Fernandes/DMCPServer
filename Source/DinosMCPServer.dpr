@@ -26,11 +26,15 @@ uses
   D.MCPServer.ResourceRead.Response.Model in 'D.MCPServer.ResourceRead.Response.Model.Pas',
   D.MCPServer.HTTP in 'D.MCPServer.HTTP.pas',
   D.MCPServer.Transport.HTTP.Interf in 'D.MCPServer.Transport.HTTP.Interf.pas',
-  D.MCPServer.Json.Helper in 'D.MCPServer.Json.Helper.pas';
+  D.MCPServer.Json.Helper in 'D.MCPServer.Json.Helper.pas',
+  D.MCPServer.Register.Prompt.Interf in 'D.MCPServer.Register.Prompt.Interf.pas',
+  D.MCPServer.Register.Prompt in 'D.MCPServer.Register.Prompt.pas',
+  D.MCPServer.PromptGet.Response.Model in 'D.MCPServer.PromptGet.Response.Model.pas',
+  System.Generics.Collections;
 
 var lDMCP: IDMCPServerRegister;
  lCallbackGetWeather: TMCPAction;
- lCallbackHelloWorld: TMCPAction;
+ lCallbackWeatherPrompt: TMCPPromptAction;
  lCallbackTest: TMCPAction;
 
  type
@@ -53,7 +57,7 @@ var
   Humidity: Integer;
 begin
   // radom data
-  Temperature := Random(31) + 5; // 5-35∞C
+  Temperature := Random(31) + 5; // 5-35¬ùC
   case Random(4) of
     0: Condition := 'Ensolarado';
     1: Condition := 'Nublado';
@@ -68,6 +72,23 @@ end;
 
 begin
   try
+    lCallbackWeatherPrompt :=
+      procedure(var Arguments: TJSONObject; out Messages: TObjectList<TMCPPromptMessage>; out Error: string)
+      var
+        lWeather: string;
+      begin
+        try
+          Messages := TObjectList<TMCPPromptMessage>.Create(True);
+          lWeather := Arguments.GetParam('weather');
+          Messages.Add(TMCPPromptMessage.Create('user',
+            'Analise a previsao do tempo a seguir e de dicas sobre o que fazer: ' + lWeather +
+            '. Indique atividades, culinarias, programas, etc.'));
+          Error := '';
+        finally
+          Arguments.Free;
+        end;
+      end;
+
     lCallbackGetWeather :=
        procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent)
        var
@@ -117,12 +138,20 @@ begin
 
     lDMCP
       .RegisterAction('get_weather', 'Get weather information, such as the latest weather forecast.', lCallbackGetWeather)
+      .RegisterPromptAction('get_weather_prompt', lCallbackWeatherPrompt)
       .Protocol(pMcpSTDIO)  //To Run Local use pMcpSTIO
-      //.Port('8182')  //No Need to pMcpSTIO
-      //.Host('127.0.0.1') //No Need to pMcpSTIO
+      .Port('8182')  //No Need to pMcpSTIO
+      .Host('127.0.0.1') //No Need to pMcpSTIO
       .ServerInfo
         .SetServerName('DinosMCPServer')
         .SetVersion('0.1.0')
+        .Prompts(TMCPServerPrompts.New
+           .SetName('get_weather_prompt') //Same name the RegisterPromptAction
+           .SetDescription('Analyze the weather forecast and tips')
+           .AddArgument(TMCPServerPromptArgument.New
+             .SetName('get_weather')
+             .SetDescription('Analyze the weather forecast and tips on what to do for each temperature and climate variation, indicate activities, cuisines, programs, etc.')
+             .SetRequired(True)))
         .Resources(TMCPServerResources.New
            .SetUri('file:///'+ ParamStr(0).Replace('\','/') + '/Resource_teste/Resource.txt')
            .SetName('weather forecasting works.')

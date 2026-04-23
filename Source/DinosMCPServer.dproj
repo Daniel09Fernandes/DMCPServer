@@ -138,6 +138,9 @@
         <DCCReference Include="D.MCPServer.HTTP.pas"/>
         <DCCReference Include="D.MCPServer.Transport.HTTP.Interf.pas"/>
         <DCCReference Include="D.MCPServer.Json.Helper.pas"/>
+        <DCCReference Include="D.MCPServer.Register.Prompt.Interf.pas"/>
+        <DCCReference Include="D.MCPServer.Register.Prompt.pas"/>
+        <DCCReference Include="D.MCPServer.PromptGet.Response.Model.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

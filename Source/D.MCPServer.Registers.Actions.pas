@@ -65,6 +65,7 @@ type
     destructor Destroy; override;
 
     function RegisterAction(const ActionName, ActionDescription: string; const ActionProc: TMCPAction): IDMCPServerRegister;
+    function RegisterPromptAction(const APromptName: string; const APromptProc: TMCPPromptAction): IDMCPServerRegister;
     function ServerInfo: IMCPServerInfos;
     function Required: TDictionary<string, IMCPServerToolsSchemaTypes>;
     function SetLogs(AEnabledLogs: Boolean): IDMCPServerRegister;
@@ -161,6 +162,12 @@ end;
 function TDMCPServerRegister.RegisterAction(const ActionName, ActionDescription: string; const ActionProc: TMCPAction): IDMCPServerRegister;
 begin
   DMCPServer.Actions.Add(ActionName, ActionProc);
+  Result := Self;
+end;
+
+function TDMCPServerRegister.RegisterPromptAction(const APromptName: string; const APromptProc: TMCPPromptAction): IDMCPServerRegister;
+begin
+  DMCPServer.PromptActions.Add(APromptName, APromptProc);
   Result := Self;
 end;
 

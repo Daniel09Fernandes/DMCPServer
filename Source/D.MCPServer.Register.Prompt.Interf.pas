@@ -23,44 +23,42 @@ SOFTWARE.}
 
 { DMCP Library }
 
-{ File     : D.MCPServer.Registers.Interf.pas }
+{ File     : D.MCPServer.Register.Prompt.Interf.pas }
 { Developer: Daniel Fernandes Rodrigures }
 { Email    : danielfernandesroddrigues@gmail.com }
 { this unit is a part of the Open Source. }
 { licensed under a MIT - see LICENSE.md}
 
 { ******************************************************* }
-unit D.MCPServer.Registers.Interf;
+
+unit D.MCPServer.Register.Prompt.Interf;
 
 interface
 
 uses
-  System.Generics.Collections,
-  D.MCPServer.Registers.Tools.Interf,
-  D.MCPServer.Register.Resource.Interf,
-  D.MCPServer.Register.Prompt.Interf;
+  System.Generics.Collections;
 
 type
-  IMCPServerInfos = interface;
+  IMCPServerPromptArgument = interface
+    ['{A1B2C3D4-1111-4AAA-BBBB-000000000001}']
 
-  IMCPServerInfoTools = interface
-  ['{F305A146-B0D1-4C5C-A630-8DF6C56DB3B5}']
-
-    function Tools: TList<IMCPServerTools>; overload;
-    function Tools(AListTools: IMCPServerTools): IMCPServerInfos; overload;
-    function Resources(AResource: IMCPServerResources): IMCPServerInfos; overload;
-    function Resources: TList<IMCPServerResources>; overload;
-    function Prompts(APrompt: IMCPServerPrompts): IMCPServerInfos; overload;
-    function Prompts: TList<IMCPServerPrompts>; overload;
+    function SetName(AName: string): IMCPServerPromptArgument;
+    function GetName: string;
+    function SetDescription(ADescription: string): IMCPServerPromptArgument;
+    function GetDescription: string;
+    function SetRequired(ARequired: Boolean): IMCPServerPromptArgument;
+    function GetRequired: Boolean;
   end;
 
-  IMCPServerInfos = interface(IMCPServerInfoTools)
-    ['{54F355AD-1FD0-45C0-91DC-41FABC34BB7D}']
+  IMCPServerPrompts = interface
+    ['{A1B2C3D4-2222-4AAA-BBBB-000000000002}']
 
-    function SetServerName(AServerName: string): IMCPServerInfos;
-    function GetServerName: string;
-    function SetVersion(AServerName: string): IMCPServerInfos;
-    function GetVersion: string;
+    function SetName(AName: string): IMCPServerPrompts;
+    function GetName: string;
+    function SetDescription(ADescription: string): IMCPServerPrompts;
+    function GetDescription: string;
+    function AddArgument(AArg: IMCPServerPromptArgument): IMCPServerPrompts;
+    function GetArguments: TList<IMCPServerPromptArgument>;
   end;
 
 implementation

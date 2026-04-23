@@ -51,7 +51,9 @@ uses
   D.MCPServer.Registers.Tools,
   D.MCPServer.Registers.Actions.Interf,
   D.MCPServer.Registers.Tools.Interf,
-  D.MCPServer.Register.Resource.Interf;
+  D.MCPServer.Register.Resource.Interf,
+  D.MCPServer.Register.Prompt.Interf,
+  D.MCPServer.PromptGet.Response.Model;
 
 type
   TMCPServerActions = TMCPAction;
@@ -62,8 +64,10 @@ type
      FEnabledLogs: Boolean;
   var
     FActions: TDictionary<string, TMCPServerActions>;
+    FPromptActions: TDictionary<string, TMCPPromptAction>;
     FCapabilities: TJSONArray;
     FResources: TJSONArray;
+    FPrompts: TJSONArray;
     FServerInfo: IMCPServerInfos;
     FNotReply: Boolean;
     function FindResourceByUrl(AURL: string): IMCPServerResources;
@@ -80,6 +84,7 @@ type
 
     class procedure WriteToLog(const AMessage: string);
     property Actions: TDictionary<string, TMCPServerActions> read FActions write FActions;
+    property PromptActions: TDictionary<string, TMCPPromptAction> read FPromptActions write FPromptActions;
   end;
 
   var
@@ -93,6 +98,7 @@ uses
   StrUtils,
   NetEncoding,
   D.MCPServer.Consts,
+  D.MCPServer.Json.Helper,
   System.IOUtils;
 
 class procedure TDMCPServer.WriteToLog(const AMessage: string);
@@ -105,6 +111,7 @@ var
 begin
   if not FEnabledLogs then Exit;
 
+  Writeln(AMessage);
   lLogFile := ExtractFilePath(ParamStr(0)) + FormatDateTime('yy_mm_dd_hh', Now) + DMCP_LOG;
   lText := '['+DateTimeToStr(Now) + ']: ' + AMessage;
   lBytes := TEncoding.UTF8.GetBytes(lText);
@@ -123,6 +130,7 @@ begin
     except
       on E: EFileStreamError do
       begin
+        Writeln(E.Message);
         Inc(lAttempts);
         if lAttempts > 5 then Exit;
           Sleep(50);
@@ -138,8 +146,10 @@ begin
   FNotReply := False;
   try
     FActions := TDictionary<string, TMCPAction>.Create;
+    FPromptActions := TDictionary<string, TMCPPromptAction>.Create;
     FCapabilities := TJSONArray.Create;
     FResources := TJSONArray.Create;
+    FPrompts := TJSONArray.Create;
   except
     on E: Exception do
     begin
@@ -152,8 +162,10 @@ end;
 destructor TDMCPServer.Destroy;
 begin
   FActions.Free;
+  FPromptActions.Free;
   FCapabilities.Free;
   FResources.Free;
+  FPrompts.Free;
   inherited;
 end;
 
@@ -162,11 +174,16 @@ var
   lJsonProp: TJSONObject;
   lJsonTool: TJSONObject;
   lJsonResource: TJSONObject;
+  lJsonPrompt: TJSONObject;
   lJsonRequired: TJSONArray;
+  lJsonArgs: TJSONArray;
+  lJsonArg: TJSONObject;
   lRequired: string;
   lProp: TPair<string, IMCPServerToolsSchemaTypes>;
   lTool: IMCPServerTools;
   IResource: IMCPServerResources;
+  IPrompt: IMCPServerPrompts;
+  IArg: IMCPServerPromptArgument;
 begin
   for lTool in FServerInfo.Tools do
   begin
@@ -212,6 +229,26 @@ begin
        lJsonResource.AddPair('mimeType', IResource.GetMimeType);
 
     FResources.AddElement(lJsonResource);
+  end;
+
+  for IPrompt in FServerInfo.Prompts do
+  begin
+    lJsonArgs := TJSONArray.Create;
+    for IArg in IPrompt.GetArguments do
+    begin
+      lJsonArg := TJSONObject.Create
+        .AddPair(DMCP_JSON_NAME, IArg.GetName)
+        .AddPair(DMCP_JSON_DESCRIPTION, IArg.GetDescription)
+        .AddPair(DMCP_JSON_REQUIRED, IArg.GetRequired);
+      lJsonArgs.Add(lJsonArg);
+    end;
+
+    lJsonPrompt := TJSONObject.Create
+      .AddPair(DMCP_JSON_NAME, IPrompt.GetName)
+      .AddPair(DMCP_JSON_DESCRIPTION, IPrompt.GetDescription)
+      .AddPair(DMCP_RESP_PROMPTS_ARGUMENTS, lJsonArgs);
+
+    FPrompts.AddElement(lJsonPrompt);
   end;
 end;
 
@@ -274,14 +311,16 @@ begin
     lMethod := ARequest.GetValue(DMCP_REQ_METHOD).Value;
 
     case AnsiIndexStr(LowerCase(lMethod), [DMCP_REQ_METHOD_INITIALIZATION, DMCP_REQ_METHOD_TOOLS_LIST, DMCP_REQ_METHOD_RESOURCE_LIST,
-       DMCP_REQ_METHOD_PROMPT_LIST, DMCP_REQ_METHOD_NOTIFICATION_INITIALIZED, DMCP_REQ_METHOD_TOOLS_CALL, DMCP_REQ_METHOD_RESOURCE_READ]) of
+       DMCP_REQ_METHOD_PROMPT_LIST, DMCP_REQ_METHOD_NOTIFICATION_INITIALIZED, DMCP_REQ_METHOD_TOOLS_CALL, DMCP_REQ_METHOD_RESOURCE_READ,
+       DMCP_REQ_METHOD_PROMPT_GET]) of
 
       DMCP_REQ_METHOD_INITIALIZATION_IDX:
         begin
           lMCPJson := TJSONObject.Create;
           lMCPJson.AddPair(DMCP_RESP_PROTOCOL_VERSION, lProtocol.Clone as TJSONValue);
           lMCPJson.AddPair(DMCP_RESP_CAPABILITES, TJSONObject.Create
-            .AddPair(DMCP_RESP_TOOLS,TJSONObject.Create));
+            .AddPair(DMCP_RESP_TOOLS, TJSONObject.Create)
+            .AddPair(DMCP_RESP_PROMPTS, TJSONObject.Create));
 
           lMCPJson.AddPair(DMCP_RESP_SERVER_INFO, TJSONObject.Create
             .AddPair(DMCP_RESP_SERVER_NAME, FServerInfo.GetServerName)
@@ -349,10 +388,80 @@ begin
         end;
 
       DMCP_REQ_METHOD_PROMPT_LIST_IDX:
-        begin  //Necessary implement
-          Result.AddPair(DMCP_RESP_SERVER_RESULT, TJSONObject.Create);
+        begin
+          var lJsonArrayPrompts := FPrompts.Clone as TJSONArray;
+
+          Result.AddPair(DMCP_RESP_SERVER_RESULT, TJSONObject.Create
+            .AddPair(DMCP_RESP_PROMPTS, lJsonArrayPrompts));
 
           TDMCPServer.WriteToLog(DMCP_LOG_CALL_PROMPTS_LIST);
+        end;
+
+      DMCP_REQ_METHOD_PROMPT_GET_IDX:
+        begin
+          var lPromptName := '';
+          var lPromptArgs: TJSONObject := nil;
+          var lParamsObj := ARequest.GetValue(DMCP_REQ_PARAMS);
+
+          if Assigned(lParamsObj) then
+          begin
+            var lNameValue := lParamsObj.FindValue(DMCP_JSON_NAME);
+            if Assigned(lNameValue) then
+              lPromptName := lNameValue.Value;
+
+            var lArgsValue := lParamsObj.FindValue(DMCP_RESP_PROMPTS_ARGUMENTS);
+            if Assigned(lArgsValue) and (lArgsValue is TJSONObject) then
+              lPromptArgs := lArgsValue.Clone as TJSONObject
+            else
+              lPromptArgs := TJSONObject.Create;
+          end;
+
+          if FPromptActions.ContainsKey(lPromptName) then
+          begin
+            var lMessages: TObjectList<TMCPPromptMessage> := nil;
+            var lError := '';
+            try
+              FPromptActions.Items[lPromptName](lPromptArgs, lMessages, lError);
+
+              if lError = '' then
+              begin
+                var lPromptResult := TMCPPromptGetResult.Create;
+                try
+                  lPromptResult.Description := lPromptName;
+                  if Assigned(lMessages) then
+                  begin
+                    while lMessages.Count > 0 do
+                    begin
+                      lPromptResult.Messages.Add(lMessages.Items[0]);
+                      lMessages.OwnsObjects := False;
+                      lMessages.Delete(0);
+                      lMessages.OwnsObjects := True;
+                    end;
+                  end;
+                  Result.AddPair(DMCP_RESP_SERVER_RESULT, lPromptResult.ToJsonResult);
+                finally
+                  lPromptResult.Free;
+                end;
+              end
+              else
+              begin
+                Result.AddPair(DMCP_RESP_SERVER_ERROR, TJSONObject.Create
+                  .AddPair(DMCP_RESP_SERVER_ERROR_CODE, DMCP_RESP_SERVER_ERROR_CODE_INVALID_PARAMS)
+                  .AddPair(DMCP_RESP_SERVER_ERROR_MESSAGE, lError));
+              end;
+            finally
+              if Assigned(lMessages) then
+                lMessages.Free;
+            end;
+          end
+          else
+          begin
+            Result.AddPair(DMCP_RESP_SERVER_ERROR, TJSONObject.Create
+              .AddPair(DMCP_RESP_SERVER_ERROR_CODE, DMCP_RESP_SERVER_ERROR_CODE_INVALID_PARAMS)
+              .AddPair(DMCP_RESP_SERVER_ERROR_MESSAGE, 'Prompt not found: ' + lPromptName));
+          end;
+
+          TDMCPServer.WriteToLog(DMCP_LOG_CALL_PROMPT_GET);
         end;
 
       DMCP_REQ_METHOD_NOTIFICATION_INITIALIZED_IDX:

@@ -41,7 +41,8 @@ const
   DMCP_LOG_CALL_INIT = 'call initialize ^';
   DMCP_LOG_CALL_TOOLS_LIST = 'call tools/list ^';
   DMCP_LOG_CALL_RESOURCE_LIST = 'call resources/list ^';
-  DMCP_LOG_CALL_PROMPTS_LIST = 'prompts/list ^';
+  DMCP_LOG_CALL_PROMPTS_LIST = 'call prompts/list ^';
+  DMCP_LOG_CALL_PROMPT_GET = 'call prompts/get ^';
   DMCP_LOG_CALL_NOTIFY_INIT =  'call notifications/initialized ^';
   DMCP_LOG_DEBUG_STACK = 'Stack: ';
   DMCP_LOG_SERVER_INIT = 'Dinos MCPServer initialized (STDIO) - wait connections';
@@ -85,6 +86,13 @@ const
   DMCP_RESP_SERVER_ERROR_MESSAGE = 'message';
   DMCP_RESP_SERVER_ERROR_MESSAGE_METHOD_404 = 'Method not found: ';
   DMCP_RESP_SERVER_ERROR_MESSAGE_METHOD_500 = 'Internal server error: ';
+  DMCP_RESP_SERVER_ERROR_CODE_INVALID_PARAMS = -32602;
+
+  //Prompts
+  DMCP_RESP_PROMPTS = 'prompts';
+  DMCP_RESP_PROMPTS_ARGUMENTS = 'arguments';
+  DMCP_RESP_PROMPTS_MESSAGES = 'messages';
+  DMCP_RESP_PROMPTS_ROLE = 'role';
 
   //Methods Server
   DMCP_REQ_METHOD_INITIALIZATION = 'initialize'; //0
@@ -94,6 +102,7 @@ const
   DMCP_REQ_METHOD_PROMPT_LIST = 'prompts/list';    //3
   DMCP_REQ_METHOD_NOTIFICATION_INITIALIZED = 'notifications/initialized'; //4
   DMCP_REQ_METHOD_RESOURCE_READ = 'resources/read'; //6
+  DMCP_REQ_METHOD_PROMPT_GET = 'prompts/get';      //7
 
   DMCP_REQ_METHOD_INITIALIZATION_IDX = 0;
   DMCP_REQ_METHOD_TOOLS_LIST_IDX = 1;
@@ -102,6 +111,7 @@ const
   DMCP_REQ_METHOD_PROMPT_LIST_IDX = 3;
   DMCP_REQ_METHOD_NOTIFICATION_INITIALIZED_IDX = 4;
   DMCP_REQ_METHOD_RESOURCE_READ_IDX = 6;
+  DMCP_REQ_METHOD_PROMPT_GET_IDX = 7;
 
   //RESOURCE LIST
   DMCP_RESOURCE_LIST_URI = 'uri';

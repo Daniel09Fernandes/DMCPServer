@@ -40,17 +40,20 @@ uses
     System.Generics.Collections,
     D.MCPServer.ToolsCall.Model,
     D.MCPServer.ToolsCall.Response.Model,
+    D.MCPServer.PromptGet.Response.Model,
     D.MCPServer.Registers.Interf,
     D.MCPServer.Registers.Tools.Interf;
 
 type
    TMCPAction = reference to procedure(var Params: TJSONObject; out Result: TDMCPCallToolsResult; out Error: TDMCPCallToolsContent);
+   TMCPPromptAction = reference to procedure(var Arguments: TJSONObject; out Messages: TObjectList<TMCPPromptMessage>; out Error: string);
    TMCPProtocol = (pMcpSTDIO, pMcpHTTP);
 
    IDMCPServerRegister = interface
    ['{F07BD31B-CDD6-4EDA-8F63-1123DC028790}']
 
     function RegisterAction(const ActionName, ActionDescription: string; const ActionProc: TMCPAction): IDMCPServerRegister;
+    function RegisterPromptAction(const APromptName: string; const APromptProc: TMCPPromptAction): IDMCPServerRegister;
     function ServerInfo: IMCPServerInfos;
     function Required: TDictionary<string, IMCPServerToolsSchemaTypes>;
     function SetLogs(AEnabledLogs: Boolean): IDMCPServerRegister;

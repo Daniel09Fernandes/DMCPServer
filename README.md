@@ -26,6 +26,15 @@ boss install github.com/Daniel09Fernandes/DMCPServer
 | HTTP 	     |    ✅ 	  |
 | STDIO    	 |    ✅ 	  |
 
+#Tested Delphi version
+
+| Version  	| Supported 	|   
+|----------	|-----------	| 
+| > 10.x   	|    ✅ 	    |
+| > 11.x   	|    ✅ 	    |
+| > 12.x   	|    ✅ 	    |
+| > 13.X   	|    ✅ 	    |
+
 
 ## 🚀 Register your Action
 ``` pascal

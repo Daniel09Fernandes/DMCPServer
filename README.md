@@ -1,4 +1,4 @@
-Dinos MCPServer - Version 1.0.0
+Dinos MCPServer - Version 1.0.1
 ---
 
 <p align="left">
@@ -7,7 +7,7 @@ Dinos MCPServer - Version 1.0.0
   </a>  
 </p><br>
 <p align="left">
-  <b>Transform your Delphi code on MCPServer wih DMCPServer.</b>
+  <b>Transform your Delphi code into a MCP-server with DMCPServer.</b>
 </p><br>
 
 ## 🎯 About
@@ -25,6 +25,15 @@ boss install github.com/Daniel09Fernandes/DMCPServer
 |----------- |-----------	|
 | HTTP 	     |    ✅ 	  |
 | STDIO    	 |    ✅ 	  |
+
+## Tested Delphi version
+
+| Version  	| Supported 	|   
+|----------	|-----------	| 
+| > 10.x   	|    ✅ 	    |
+| > 11.x   	|    ✅ 	    |
+| > 12.x   	|    ✅ 	    |
+| > 13.X   	|    ✅ 	    |
 
 
 ## 🚀 Register your Action
@@ -137,11 +146,19 @@ To HTTP:
 <img width="398" height="604" alt="image" src="https://github.com/user-attachments/assets/fb4f3cb4-16e6-4908-ac57-44d1a1f76f87" />
 
 
+# Flow
+
+<img width="1001" height="689" alt="image" src="https://github.com/user-attachments/assets/2fcfeed2-becf-4551-b9bc-24bb05ca3d3e" />
+
+
 
 # Documentation
  
 📖 Read the complete documentation here:  [DMCPServer-docs](https://dmcpserver-doc.lovestoblog.com/)
 
+🎬 Watch on Youtube [DMCPServer - PT-BR](https://www.youtube.com/watch?v=AAv67r8OuWo&feature=youtu.be)  
+
+🎬 Watch on Youtube, Full explanation of MCP [DMCPServer - EN-US](https://www.youtube.com/live/a5-xjUtc-CA?si=gQAIhJKf3nY4WE-z&t=4623)   
 
 ---
 

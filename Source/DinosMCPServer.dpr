@@ -57,7 +57,7 @@ var
   Humidity: Integer;
 begin
   // radom data
-  Temperature := Random(31) + 5; // 5-35C
+  Temperature := Random(31) + 5; // 5-35ÂC
   case Random(4) of
     0: Condition := 'Ensolarado';
     1: Condition := 'Nublado';
